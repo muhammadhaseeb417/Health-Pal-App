@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:health_pal/features/About%20Us/UI/about_us_screen.dart';
 import 'package:health_pal/features/Authentication/Splash/UI/splash_screen.dart';
 import 'package:health_pal/features/Authentication/login/UI/login_screen.dart';
+import 'package:health_pal/features/Home/UI/home_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -18,6 +20,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
         useMaterial3: true,
+        fontFamily: GoogleFonts.poppins().fontFamily,
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.green,
@@ -32,6 +35,7 @@ class MyApp extends StatelessWidget {
       routes: {
         "/splash": (context) => const SplashScreen(),
         "/login": (context) => const LoginScreen(),
+        "/home": (context) => const HomeScreen(),
         "/aboutus": (context) => const AboutUsScreen(),
       },
       initialRoute: "/splash",

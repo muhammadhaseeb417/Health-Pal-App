@@ -54,7 +54,10 @@ class LoginScreen extends StatelessWidget {
                 width: double.maxFinite,
                 height: 60,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.pop(context);
+                    Navigator.pushReplacementNamed(context, "/home");
+                  },
                   child: const Text(
                     'Login',
                     style: TextStyle(
