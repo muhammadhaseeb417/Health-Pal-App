@@ -7,17 +7,34 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       backgroundColor: Colors.white,
-      body: const SafeArea(
+      body: SafeArea(
         child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 20),
-            child: Column(
-              children: [
-                CustomHeaderAppBar(),
-              ],
-            ),
+          child: Column(
+            children: [
+              SizedBox(height: 20),
+              const Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: CustomHeaderAppBar(),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Row(
+                    children: [
+                      SizedBox(width: 20),
+                      Text(
+                        'Track your diet \njourney',
+                        style: TextStyle(
+                            fontSize: 27, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                  Image.asset("assets/images/avacado.png", height: 200),
+                ],
+              ),
+            ],
           ),
         ),
       ),

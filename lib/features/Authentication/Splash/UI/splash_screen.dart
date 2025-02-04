@@ -57,7 +57,9 @@ class SplashScreen extends StatelessWidget {
                     btnFor: "EMAIL",
                     icon: Icons.mail,
                     btnColor: Colors.blue,
-                    callBack: () {},
+                    callBack: () {
+                      Navigator.pushNamed(context, "/signup");
+                    },
                   ),
                   SizedBox(height: 15),
                   Row(

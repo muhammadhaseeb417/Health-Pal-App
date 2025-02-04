@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:health_pal/features/About%20Us/UI/about_us_screen.dart';
 import 'package:health_pal/features/Home/UI/home_screen.dart';
+import 'package:health_pal/features/Profile/UI/profile_screen.dart';
 
 class CustomBottomNavigationBar extends StatefulWidget {
   const CustomBottomNavigationBar({super.key});
@@ -16,7 +17,7 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
     const HomeScreen(),
     Center(child: const Text('Goal')),
     const AboutUsScreen(),
-    Center(child: const Text('Setting')),
+    ProfileScreen(),
   ];
 
   void _onItemTapped(int index) {

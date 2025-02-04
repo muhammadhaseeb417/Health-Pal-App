@@ -31,9 +31,7 @@ class AboutUsScreen extends StatelessWidget {
             SizedBox(height: 20),
             Center(
               child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pushReplacementNamed(context, '/login');
-                },
+                onPressed: () {},
                 child: Text("Get Started"),
               ),
             ),
