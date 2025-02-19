@@ -5,6 +5,7 @@ import 'package:health_pal/features/Bottom%20Navigation%20Bar/UI/custom_bottom_n
 import 'package:health_pal/features/Home/widgets/calorie_gauge_widget.dart';
 import 'package:health_pal/features/Home/widgets/custom_header_app_bar.dart';
 import 'package:health_pal/features/Home/widgets/linear_gauge_widget_details.dart';
+import 'package:health_pal/features/Home/widgets/nutrition_graph_widget.dart';
 import 'package:health_pal/utils/constants/colors.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
@@ -56,6 +57,9 @@ class HomeScreentwo extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                           color: CustomColors.orangeColor),
                     ),
+                    const SizedBox(height: 40),
+                    NutritionGraph(),
+                    const SizedBox(height: 40),
                   ],
                 ),
               ),
