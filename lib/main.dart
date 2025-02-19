@@ -8,6 +8,8 @@ import 'package:health_pal/features/Bottom%20Navigation%20Bar/UI/custom_bottom_n
 import 'package:health_pal/features/Home/UI/home_screen.dart';
 import 'package:health_pal/features/Profile/UI/profile_screen.dart';
 
+import 'features/Home/UI/home_screen_2.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -38,7 +40,7 @@ class MyApp extends StatelessWidget {
       routes: {
         "/splash": (context) => const SplashScreen(),
         "/login": (context) => const LoginScreen(),
-        "/home": (context) => const HomeScreen(),
+        "/home": (context) => const HomeScreentwo(),
         "/aboutus": (context) => const AboutUsScreen(),
         "/navbar": (context) => const CustomBottomNavigationBar(),
         "/profile": (context) => const ProfileScreen(),

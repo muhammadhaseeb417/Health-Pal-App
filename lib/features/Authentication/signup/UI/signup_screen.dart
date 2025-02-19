@@ -39,14 +39,16 @@ class SignupScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 30),
-              const CustomTextField(
+              CustomTextField(
                 textFieldFor: "Name",
                 iconData: Icons.person,
+                regExp: RegExp(r'[a-zA-Z]'),
               ),
               const SizedBox(height: 20),
-              const CustomTextField(
+              CustomTextField(
                 textFieldFor: "Email",
                 iconData: Icons.mail,
+                regExp: RegExp(r'[a-zA-Z0-9@.]'),
               ),
               const SizedBox(height: 20),
               const CustomTextField(

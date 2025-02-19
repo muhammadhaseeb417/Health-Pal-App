@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class CustomTextField extends StatelessWidget {
   final String textFieldFor;
   final IconData iconData;
-  const CustomTextField(
-      {super.key, required this.textFieldFor, required this.iconData});
+  final RegExp? regExp;
+
+  const CustomTextField({
+    super.key,
+    required this.textFieldFor,
+    required this.iconData,
+    this.regExp,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -20,14 +27,15 @@ class CustomTextField extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         TextFormField(
+          inputFormatters: regExp != null
+              ? [FilteringTextInputFormatter.allow(regExp!)]
+              : [],
           decoration: InputDecoration(
             hintText: "Enter your ${textFieldFor.toLowerCase()}",
             hintStyle: const TextStyle(
               color: Colors.black38,
             ),
-            prefixIcon: Icon(
-              iconData,
-            ),
+            prefixIcon: Icon(iconData),
             border: const OutlineInputBorder(
               borderSide: BorderSide(
                 color: Colors.black,
