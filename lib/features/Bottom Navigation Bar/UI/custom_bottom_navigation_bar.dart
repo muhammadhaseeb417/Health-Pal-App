@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:health_pal/features/About%20Us/UI/about_us_screen.dart';
+import 'package:health_pal/features/Add%20Food_or_Recipe/UI/add_food_screen.dart';
 import 'package:health_pal/features/Home/UI/home_screen.dart';
 import 'package:health_pal/features/Home/UI/home_screen_2.dart';
 import 'package:health_pal/features/Profile/UI/profile_screen.dart';
@@ -16,9 +17,9 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
   int _selectedIndex = 0;
   List<Widget> _navBarPages = [
     const HomeScreentwo(),
-    Center(child: const Text('Goal')),
+    const AddFoodScreen(),
     const AboutUsScreen(),
-    ProfileScreen(),
+    const ProfileScreen(),
   ];
 
   void _onItemTapped(int index) {
@@ -43,8 +44,8 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.grading_outlined),
-            label: 'Goal',
+            icon: Icon(Icons.add),
+            label: 'Add Food',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.info),

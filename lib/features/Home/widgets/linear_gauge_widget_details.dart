@@ -24,7 +24,7 @@ class LinearGaugeWidgetDetails extends StatelessWidget {
         Text(
           title,
           style: const TextStyle(
-            fontSize: 21,
+            fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
         ),

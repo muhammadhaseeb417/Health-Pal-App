@@ -5,7 +5,6 @@ import 'package:health_pal/features/Authentication/Splash/UI/splash_screen.dart'
 import 'package:health_pal/features/Authentication/login/UI/login_screen.dart';
 import 'package:health_pal/features/Authentication/signup/UI/signup_screen.dart';
 import 'package:health_pal/features/Bottom%20Navigation%20Bar/UI/custom_bottom_navigation_bar.dart';
-import 'package:health_pal/features/Home/UI/home_screen.dart';
 import 'package:health_pal/features/Profile/UI/profile_screen.dart';
 
 import 'features/Home/UI/home_screen_2.dart';
