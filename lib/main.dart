@@ -7,6 +7,7 @@ import 'package:health_pal/features/Authentication/signup/UI/signup_screen.dart'
 import 'package:health_pal/features/Bottom%20Navigation%20Bar/UI/custom_bottom_navigation_bar.dart';
 import 'package:health_pal/features/On%20Boarding/on_boarding_screen_1.dart';
 import 'package:health_pal/features/On%20Boarding/on_boarding_screen_2.dart';
+import 'package:health_pal/features/On%20Boarding/on_boarding_screen_3.dart';
 import 'package:health_pal/features/Profile/UI/profile_screen.dart';
 
 import 'features/Home/UI/home_screen_2.dart';
@@ -42,6 +43,7 @@ class MyApp extends StatelessWidget {
         "/splash": (context) => const SplashScreen(),
         "/onboard1": (context) => const OnBoardingScreen1(),
         "/onboard2": (context) => const OnBoardingScreen2(),
+        "/onboard3": (context) => const OnBoardingScreen3(),
         "/login": (context) => const LoginScreen(),
         "/home": (context) => const HomeScreentwo(),
         "/aboutus": (context) => const AboutUsScreen(),
@@ -49,7 +51,7 @@ class MyApp extends StatelessWidget {
         "/profile": (context) => const ProfileScreen(),
         "/signup": (context) => const SignupScreen(),
       },
-      initialRoute: "/onboard2",
+      initialRoute: "/onboard1",
     );
   }
 }
