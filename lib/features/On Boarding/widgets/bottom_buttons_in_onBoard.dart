@@ -40,9 +40,14 @@ class BottomButtonsInOnboard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 10),
-          const Text(
-            'Skip',
-            style: TextStyle(fontSize: 16),
+          GestureDetector(
+            onTap: () {
+              Navigator.pushReplacementNamed(context, '/login');
+            },
+            child: const Text(
+              'Skip',
+              style: TextStyle(fontSize: 16),
+            ),
           ),
         ],
       ),

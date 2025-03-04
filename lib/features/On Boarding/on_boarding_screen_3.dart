@@ -97,7 +97,7 @@ class _OnBoardingScreen3State extends State<OnBoardingScreen3> {
             ),
             BottomButtonsInOnboard(
               bottomGreen: true,
-              onPressed: () => Navigator.pushNamed(context, '/login'),
+              onPressed: () => Navigator.pushNamed(context, '/onboard4'),
             ),
           ],
         ),
