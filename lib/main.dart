@@ -5,6 +5,7 @@ import 'package:health_pal/features/Authentication/Splash/UI/splash_screen.dart'
 import 'package:health_pal/features/Authentication/login/UI/login_screen.dart';
 import 'package:health_pal/features/Authentication/signup/UI/signup_screen.dart';
 import 'package:health_pal/features/Bottom%20Navigation%20Bar/UI/custom_bottom_navigation_bar.dart';
+import 'package:health_pal/features/Food%20Description%20Page/food_description_page.dart';
 import 'package:health_pal/features/On%20Boarding/on_boarding_screen_1.dart';
 import 'package:health_pal/features/On%20Boarding/on_boarding_screen_2.dart';
 import 'package:health_pal/features/On%20Boarding/on_boarding_screen_3.dart';
@@ -54,6 +55,7 @@ class MyApp extends StatelessWidget {
         "/navbar": (context) => const CustomBottomNavigationBar(),
         "/profile": (context) => const ProfileScreen(),
         "/signup": (context) => const SignupScreen(),
+        "/food_description_page": (context) => const FoodDescriptionPage(),
       },
       initialRoute: "/onboard1",
     );

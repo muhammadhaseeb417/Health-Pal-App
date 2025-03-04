@@ -56,7 +56,7 @@ class LoginScreen extends StatelessWidget {
                 height: 60,
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.pop(context);
+                    // Navigator.pop(context);
                     Navigator.pushReplacementNamed(context, "/navbar");
                   },
                   child: const Text(

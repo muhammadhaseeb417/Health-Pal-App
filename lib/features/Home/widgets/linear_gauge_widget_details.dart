@@ -8,13 +8,16 @@ class LinearGaugeWidgetDetails extends StatelessWidget {
   final double gainedPortion;
   final double totalPortion;
   final Color gaugeColor;
+  final int gaugeWidth;
 
-  const LinearGaugeWidgetDetails(
-      {super.key,
-      required this.title,
-      required this.gaugeColor,
-      required this.gainedPortion,
-      required this.totalPortion});
+  const LinearGaugeWidgetDetails({
+    super.key,
+    required this.title,
+    required this.gaugeColor,
+    required this.gainedPortion,
+    required this.totalPortion,
+    this.gaugeWidth = 90,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +32,7 @@ class LinearGaugeWidgetDetails extends StatelessWidget {
           ),
         ),
         SizedBox(
-          width: 90,
+          width: gaugeWidth != 90 ? double.maxFinite : 90,
           child: SfLinearGauge(
             minimum: 0,
             maximum: totalPortion,

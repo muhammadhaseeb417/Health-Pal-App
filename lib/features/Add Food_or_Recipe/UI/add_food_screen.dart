@@ -38,7 +38,13 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
                     const NeverScrollableScrollPhysics(), // Disable internal scrolling
                 itemCount: 5,
                 itemBuilder: (context, index) {
-                  return recipeCardWidget();
+                  return GestureDetector(
+                    onTap: () {
+                      // Navigate to the food description page
+                      Navigator.pushNamed(context, "/food_description_page");
+                    },
+                    child: recipeCardWidget(),
+                  );
                 },
               ),
             ),
