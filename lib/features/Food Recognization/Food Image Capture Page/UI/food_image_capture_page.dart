@@ -398,7 +398,7 @@ class _FoodImageCapturePageState extends State<FoodImageCapturePage> {
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
-                Row(
+                Column(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     ElevatedButton.icon(

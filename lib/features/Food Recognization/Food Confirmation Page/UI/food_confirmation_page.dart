@@ -1,4 +1,3 @@
-// Page for confirming the recognized food
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -45,8 +44,12 @@ class _FoodConfirmationPageState extends State<FoodConfirmationPage> {
     });
   }
 
-  void _selectSubclass(Map<String, dynamic> subclass) {
+  void _selectSubclass(
+      Map<String, dynamic> subclass, Map<String, dynamic> parentFood) {
     setState(() {
+      // First select the parent food item
+      _selectedFood = parentFood;
+      // Then select the subclass
       _selectedSubclass = subclass;
     });
   }
@@ -73,9 +76,17 @@ class _FoodConfirmationPageState extends State<FoodConfirmationPage> {
       widget.recognitionData['recognition_results'],
     );
 
+    // Define more vibrant and sharper colors
+    final Color selectedCardColor = Colors.green.shade100;
+    final Color selectedTextColor = Colors.green.shade900;
+    final Color selectedSubclassColor = Colors.green.shade50;
+    final Color selectedSubclassTextColor = Colors.green.shade800;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Confirm Food'),
+        backgroundColor: Colors.green,
+        foregroundColor: Colors.white,
       ),
       body: Column(
         children: [
@@ -90,24 +101,36 @@ class _FoodConfirmationPageState extends State<FoodConfirmationPage> {
           ),
 
           // Food occasion
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
+          Container(
+            padding:
+                const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
+            color: Colors.green.shade50,
+            width: double.infinity,
             child: Text(
               'Detected as: ${widget.recognitionData['occasion_info']['translation'] ?? 'Unknown'}',
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.green.shade900,
+              ),
             ),
           ),
 
           // Food family
           if (widget.recognitionData['foodFamily'] != null &&
               widget.recognitionData['foodFamily'].isNotEmpty)
-            Padding(
+            Container(
               padding:
-                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              width: double.infinity,
               child: Text(
                 'Food Family: ${widget.recognitionData['foodFamily'][0]['name']} '
                 '(${(widget.recognitionData['foodFamily'][0]['prob'] * 100).toStringAsFixed(0)}%)',
-                style: const TextStyle(fontSize: 14),
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey.shade800,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
 
@@ -124,39 +147,56 @@ class _FoodConfirmationPageState extends State<FoodConfirmationPage> {
                     food['subclasses'] != null && food['subclasses'].isNotEmpty;
 
                 return Card(
-                  margin: const EdgeInsets.symmetric(vertical: 8.0),
+                  margin: const EdgeInsets.symmetric(
+                      vertical: 8.0, horizontal: 4.0),
                   elevation: isSelected ? 4 : 1,
-                  color: isSelected
-                      ? Theme.of(context).colorScheme.secondaryContainer
-                      : null,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.0),
+                    side: isSelected
+                        ? BorderSide(color: Colors.green.shade700, width: 2.0)
+                        : BorderSide.none,
+                  ),
+                  color: isSelected ? selectedCardColor : Colors.white,
                   child: Column(
                     children: [
                       // Main food item
                       ListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16.0, vertical: 8.0),
                         title: Text(
                           food['name'].toString().toUpperCase(),
                           style: TextStyle(
+                            fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: isSelected
-                                ? Theme.of(context)
-                                    .colorScheme
-                                    .onSecondaryContainer
-                                : null,
+                            color:
+                                isSelected ? selectedTextColor : Colors.black87,
                           ),
                         ),
-                        subtitle: Text(
-                          'Probability: ${(food['prob'] * 100).toStringAsFixed(1)}%',
+                        subtitle: Padding(
+                          padding: const EdgeInsets.only(top: 4.0),
+                          child: Text(
+                            'Probability: ${(food['prob'] * 100).toStringAsFixed(1)}%',
+                            style: TextStyle(
+                              color: isSelected
+                                  ? Colors.green.shade700
+                                  : Colors.grey.shade700,
+                            ),
+                          ),
                         ),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             _buildNutriScoreBadge(food),
+                            const SizedBox(width: 8),
                             if (hasSubclasses)
                               IconButton(
                                 icon: Icon(
                                   isExpanded
                                       ? Icons.expand_less
                                       : Icons.expand_more,
+                                  color: isSelected
+                                      ? Colors.green.shade700
+                                      : Colors.grey.shade700,
                                 ),
                                 onPressed: () => _toggleExpanded(food['name']),
                               ),
@@ -164,46 +204,82 @@ class _FoodConfirmationPageState extends State<FoodConfirmationPage> {
                         ),
                         onTap: () => _selectFood(food),
                         selected: isSelected,
+                        tileColor: isSelected ? selectedCardColor : null,
                       ),
 
                       // Subclasses (if any and if expanded)
                       if (isExpanded && hasSubclasses)
-                        Padding(
-                          padding: const EdgeInsets.only(left: 16.0),
+                        Container(
+                          margin: const EdgeInsets.only(
+                              left: 16.0, right: 16.0, bottom: 16.0),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade100,
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
                           child: Column(
-                            children: List.generate(
-                              food['subclasses'].length,
-                              (subIndex) {
-                                final subclass = food['subclasses'][subIndex];
-                                final bool isSubclassSelected =
-                                    _selectedSubclass == subclass;
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text(
+                                  'Types',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey.shade800,
+                                  ),
+                                ),
+                              ),
+                              ...List.generate(
+                                food['subclasses'].length,
+                                (subIndex) {
+                                  final subclass = food['subclasses'][subIndex];
+                                  final bool isSubclassSelected =
+                                      _selectedSubclass == subclass;
 
-                                return ListTile(
-                                  title: Text(
-                                    subclass['name'],
-                                    style: TextStyle(
+                                  return Container(
+                                    margin: const EdgeInsets.symmetric(
+                                        horizontal: 4.0, vertical: 2.0),
+                                    decoration: BoxDecoration(
                                       color: isSubclassSelected
-                                          ? Theme.of(context)
-                                              .colorScheme
-                                              .primary
+                                          ? selectedSubclassColor
+                                          : Colors.white,
+                                      borderRadius: BorderRadius.circular(8.0),
+                                      border: isSubclassSelected
+                                          ? Border.all(
+                                              color: Colors.green.shade500,
+                                              width: 1.5)
                                           : null,
                                     ),
-                                  ),
-                                  subtitle: Text(
-                                    'Probability: ${(subclass['prob'] * 100).toStringAsFixed(1)}%',
-                                  ),
-                                  trailing: _buildNutriScoreBadge(subclass),
-                                  onTap: () => _selectSubclass(subclass),
-                                  selected: isSubclassSelected,
-                                  tileColor: isSubclassSelected
-                                      ? Theme.of(context)
-                                          .colorScheme
-                                          .primaryContainer
-                                          .withOpacity(0.3)
-                                      : null,
-                                );
-                              },
-                            ),
+                                    child: ListTile(
+                                      dense: true,
+                                      title: Text(
+                                        subclass['name'],
+                                        style: TextStyle(
+                                          fontWeight: isSubclassSelected
+                                              ? FontWeight.bold
+                                              : FontWeight.normal,
+                                          color: isSubclassSelected
+                                              ? selectedSubclassTextColor
+                                              : Colors.black87,
+                                        ),
+                                      ),
+                                      subtitle: Text(
+                                        'Probability: ${(subclass['prob'] * 100).toStringAsFixed(1)}%',
+                                        style: TextStyle(
+                                          color: isSubclassSelected
+                                              ? Colors.green.shade600
+                                              : Colors.grey.shade700,
+                                        ),
+                                      ),
+                                      trailing: _buildNutriScoreBadge(subclass),
+                                      onTap: () =>
+                                          _selectSubclass(subclass, food),
+                                      selected: isSubclassSelected,
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
                           ),
                         ),
                     ],
@@ -219,9 +295,21 @@ class _FoodConfirmationPageState extends State<FoodConfirmationPage> {
             child: ElevatedButton(
               onPressed: (_selectedFood != null) ? _confirmFoodSelection : null,
               style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                foregroundColor: Colors.white,
                 minimumSize: const Size.fromHeight(50),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 12.0),
               ),
-              child: const Text('Confirm Selection'),
+              child: const Text(
+                'Confirm Selection',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ),
         ],
@@ -237,38 +325,48 @@ class _FoodConfirmationPageState extends State<FoodConfirmationPage> {
     final category = food['nutri_score']['nutri_score_category'] as String;
     final score = food['nutri_score']['nutri_score_standardized'] as int;
 
+    // Sharper and more vibrant colors for nutri-score badges
     Color badgeColor;
     switch (category) {
       case 'A':
-        badgeColor = Colors.green;
+        badgeColor = Colors.green.shade700;
         break;
       case 'B':
-        badgeColor = Colors.lightGreen;
+        badgeColor = Colors.lightGreen.shade700;
         break;
       case 'C':
-        badgeColor = Colors.yellow;
+        badgeColor = Colors.amber.shade700;
         break;
       case 'D':
-        badgeColor = Colors.orange;
+        badgeColor = Colors.orange.shade700;
         break;
       case 'E':
-        badgeColor = Colors.red;
+        badgeColor = Colors.red.shade700;
         break;
       default:
-        badgeColor = Colors.grey;
+        badgeColor = Colors.grey.shade700;
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
       decoration: BoxDecoration(
         color: badgeColor,
         borderRadius: BorderRadius.circular(12.0),
+        boxShadow: [
+          BoxShadow(
+            color: badgeColor.withOpacity(0.3),
+            spreadRadius: 1,
+            blurRadius: 2,
+            offset: const Offset(0, 1),
+          ),
+        ],
       ),
       child: Text(
         '$category ($score)',
         style: const TextStyle(
           color: Colors.white,
           fontWeight: FontWeight.bold,
+          fontSize: 13,
         ),
       ),
     );
