@@ -5,6 +5,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../Food Confirmation Page/UI/food_confirmation_page.dart';
+
 class FoodImageCapturePage extends StatefulWidget {
   const FoodImageCapturePage({Key? key}) : super(key: key);
 
