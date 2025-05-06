@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:health_pal/features/About%20Us/UI/about_us_screen.dart';
@@ -14,8 +15,13 @@ import 'package:health_pal/features/Profile/UI/profile_screen.dart';
 
 import 'features/Home/UI/home_screen_2.dart';
 import 'features/On Boarding/on_boarding_screen_4.dart';
+import '../firebase_options.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MyApp());
 }
 

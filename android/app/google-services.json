@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "987540147963",
+    "firebase_url": "https://health-pal-4f02d-default-rtdb.firebaseio.com",
+    "project_id": "health-pal-4f02d",
+    "storage_bucket": "health-pal-4f02d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:987540147963:android:d9ee50113e0e5453d0ea5e",
+        "android_client_info": {
+          "package_name": "com.example.health_pal"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDLN5v_4GLFWX0ubVwX1AQhOD2DEKkQB6I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
