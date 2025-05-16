@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'dart:math';
+import 'dart:developer' as developer;
 
 class LocationScreen extends StatefulWidget {
   const LocationScreen({super.key});
@@ -69,6 +71,14 @@ class _LocationScreenState extends State<LocationScreen> {
   @override
   void initState() {
     super.initState();
+    // Log API key status
+    developer.log(
+        'Google Maps API Key: ${googleApiKey.isEmpty ? "NOT SET" : "is set"}');
+    if (googleApiKey.isEmpty) {
+      developer.log(
+          'WARNING: Google Maps API Key is not set. Maps may not work properly.');
+    }
+
     // Don't make initState async — use a separate method
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _getUserLocation();
@@ -87,23 +97,42 @@ class _LocationScreenState extends State<LocationScreen> {
             flex: 3,
             child: currentPosition == null
                 ? const Center(child: CircularProgressIndicator())
-                : GoogleMap(
-                    onMapCreated: (controller) {
-                      mapController = controller;
-                      _updateMapLocation();
-                    },
-                    initialCameraPosition: CameraPosition(
-                      target: currentPosition != null
-                          ? LatLng(
-                              currentPosition!.latitude,
-                              currentPosition!.longitude,
-                            )
-                          : const LatLng(0, 0), // Default position
-                      zoom: 15,
-                    ),
-                    myLocationEnabled: true,
-                    myLocationButtonEnabled: true,
-                    markers: markers,
+                : Stack(
+                    children: [
+                      GoogleMap(
+                        onMapCreated: (controller) {
+                          mapController = controller;
+                          _updateMapLocation();
+                        },
+                        initialCameraPosition: CameraPosition(
+                          target: currentPosition != null
+                              ? LatLng(
+                                  currentPosition!.latitude,
+                                  currentPosition!.longitude,
+                                )
+                              : const LatLng(0, 0), // Default position
+                          zoom: 15,
+                        ),
+                        myLocationEnabled: true,
+                        myLocationButtonEnabled: true,
+                        markers: markers,
+                        onCameraMoveStarted: () {
+                          // Handle camera move started if needed
+                        },
+                      ),
+                      Positioned(
+                        top: 10,
+                        right: 10,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          color: Colors.white.withOpacity(0.8),
+                          child: Text(
+                            'API Key: ${googleApiKey.isEmpty ? "Not Set" : "${googleApiKey.substring(0, min(4, googleApiKey.length))}..."}',
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
           ),
           Expanded(
@@ -135,6 +164,17 @@ class _LocationScreenState extends State<LocationScreen> {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 10),
+                  if (googleApiKey.isEmpty)
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      color: Colors.red.withOpacity(0.2),
+                      child: const Text(
+                        'API Key not found. Check your .env file and configuration.',
+                        style: TextStyle(color: Colors.red, fontSize: 12),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
                 ],
               ),
             ),

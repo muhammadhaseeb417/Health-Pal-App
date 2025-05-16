@@ -74,6 +74,7 @@ class MyApp extends StatelessWidget {
         "/navbar": (context) => const CustomBottomNavigationBar(),
         "/profile": (context) => const ProfileScreen(),
         "/signup": (context) => const SignupScreen(),
+        "/location": (context) => const LocationScreen(),
         "/food_description_page": (context) => const FoodDescriptionPage(),
       },
       // home: AuthenticationWrapper(hasSeenOnboarding: hasSeenOnboarding),
