@@ -9,12 +9,17 @@ class OnBoardingScreenWidgetReuseable extends StatelessWidget {
   final String nextPageRoute;
   final int pageIndex;
   final List<Map<String, String>> goals;
-  const OnBoardingScreenWidgetReuseable(
-      {super.key,
-      required this.topText,
-      required this.nextPageRoute,
-      required this.goals,
-      required this.pageIndex});
+  final Function?
+      onComplete; // Added callback function for onboarding completion
+
+  const OnBoardingScreenWidgetReuseable({
+    super.key,
+    required this.topText,
+    required this.nextPageRoute,
+    required this.goals,
+    required this.pageIndex,
+    this.onComplete, // Optional parameter
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +60,15 @@ class OnBoardingScreenWidgetReuseable extends StatelessWidget {
             left: 0,
             right: 0,
             child: BottomButtonsInOnboard(
-              onPressed: () => Navigator.pushNamed(context, nextPageRoute),
+              onPressed: () {
+                // If this is the last onboarding screen and we have an onComplete callback
+                if (onComplete != null && pageIndex == 4) {
+                  onComplete!();
+                } else {
+                  // Otherwise just navigate to the next screen
+                  Navigator.pushNamed(context, nextPageRoute);
+                }
+              },
             ),
           ),
         ],

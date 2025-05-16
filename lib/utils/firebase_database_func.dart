@@ -7,10 +7,10 @@ class FirebaseDatabaseFunc {
   // FirebaseDatabase instance
   static final database = FirebaseDatabase.instanceFor(
     app: Firebase.app(),
-    databaseURL: 'https://life-hero-app-118e4-default-rtdb.firebaseio.com/',
+    databaseURL: 'https://health-pal-4f02d-default-rtdb.firebaseio.com/',
   );
 
-  static final userRef = database.ref("lifehero_db").child("users_data");
+  static final userRef = database.ref("healthPal_db").child("users_data");
 
   // Method to get data from the database
   void getData() {

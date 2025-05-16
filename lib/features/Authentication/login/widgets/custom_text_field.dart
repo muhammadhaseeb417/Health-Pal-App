@@ -5,12 +5,16 @@ class CustomTextField extends StatelessWidget {
   final String textFieldFor;
   final IconData iconData;
   final RegExp? regExp;
+  final TextEditingController? controller;
+  final bool isPasswordField;
 
   const CustomTextField({
     super.key,
     required this.textFieldFor,
     required this.iconData,
     this.regExp,
+    this.controller,
+    this.isPasswordField = false,
   });
 
   @override
@@ -27,6 +31,8 @@ class CustomTextField extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         TextFormField(
+          obscureText: isPasswordField,
+          controller: controller,
           inputFormatters: regExp != null
               ? [FilteringTextInputFormatter.allow(regExp!)]
               : [],
