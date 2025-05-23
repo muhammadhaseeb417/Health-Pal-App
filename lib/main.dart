@@ -2,8 +2,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:health_pal/features/About%20Us/UI/about_us_screen.dart';
-import 'package:health_pal/features/Authentication/Splash/UI/splash_screen.dart';
+import 'package:health_pal/features/Authentication/main_auth_screen/UI/main_auth_screen.dart';
 import 'package:health_pal/features/Authentication/login/UI/login_screen.dart';
+import 'package:health_pal/features/Authentication/services/firebase_database_func.dart';
 import 'package:health_pal/features/Authentication/signup/UI/signup_screen.dart';
 import 'package:health_pal/features/Bottom%20Navigation%20Bar/UI/custom_bottom_navigation_bar.dart';
 import 'package:health_pal/features/Food%20Description%20Page/food_description_page.dart';
@@ -18,12 +19,14 @@ import 'package:health_pal/features/Authentication/services/user_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'features/Home/UI/home_screen_2.dart';
-import 'features/On Boarding/on_boarding_screen_4.dart';
+import 'features/On%20Boarding/on_boarding_screen_4.dart';
 import '../firebase_options.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 // Create a global instance or use dependency injection
 final UserAuth userAuth = UserAuth();
+final FirebaseDatabaseService firebaseDatabaseService =
+    FirebaseDatabaseService();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,17 +35,40 @@ void main() async {
   );
   await dotenv.load(fileName: ".env");
 
-  // Check if user has seen onboarding
+  // Check app-level onboarding
   final prefs = await SharedPreferences.getInstance();
-  final hasSeenOnboarding = prefs.getBool('hasSeenOnboarding') ?? false;
+  final hasSeenOnboardingOfApp =
+      prefs.getBool('hasSeenOnboardingOfApp') ?? false;
 
-  runApp(MyApp(hasSeenOnboarding: hasSeenOnboarding));
+  // Check user-specific onboarding (only if user is logged in)
+  bool userHasSeenOnboarding = false;
+  User? currentUser = FirebaseAuth.instance.currentUser;
+  if (currentUser != null) {
+    try {
+      userHasSeenOnboarding =
+          await firebaseDatabaseService.getHasSeenOnboarding(currentUser.uid);
+    } catch (e) {
+      print('Error fetching user onboarding status: $e');
+      // Default to false if there's an error
+      userHasSeenOnboarding = false;
+    }
+  }
+
+  runApp(MyApp(
+    hasSeenOnboardingOfApp: hasSeenOnboardingOfApp,
+    userHasSeenOnboarding: userHasSeenOnboarding,
+  ));
 }
 
 class MyApp extends StatelessWidget {
-  final bool hasSeenOnboarding;
+  final bool hasSeenOnboardingOfApp;
+  final bool userHasSeenOnboarding;
 
-  const MyApp({super.key, required this.hasSeenOnboarding});
+  const MyApp({
+    super.key,
+    required this.hasSeenOnboardingOfApp,
+    required this.userHasSeenOnboarding,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -80,40 +106,53 @@ class MyApp extends StatelessWidget {
         "/food_description_page": (context) => const FoodDescriptionPage(),
       },
       home: AuthenticationWrapper(
-        hasSeenOnboarding: hasSeenOnboarding,
-        userAuth: userAuth, // Pass the instance
+        hasSeenOnboardingOfApp: hasSeenOnboardingOfApp,
+        userHasSeenOnboarding: userHasSeenOnboarding,
+        userAuth: userAuth,
       ),
     );
   }
 }
 
 class AuthenticationWrapper extends StatelessWidget {
-  final bool hasSeenOnboarding;
-  final UserAuth userAuth; // Add this parameter
+  final bool hasSeenOnboardingOfApp;
+  final bool userHasSeenOnboarding;
+  final UserAuth userAuth;
 
   const AuthenticationWrapper({
-    super.key, 
-    required this.hasSeenOnboarding,
-    required this.userAuth, // Require the instance
+    super.key,
+    required this.hasSeenOnboardingOfApp,
+    required this.userHasSeenOnboarding,
+    required this.userAuth,
   });
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<User?>(
-      stream: userAuth.authStateChanges, // Use the instance
+      stream: userAuth.authStateChanges,
       builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          // Show splash screen while waiting for auth state
+          return const CircularProgressIndicator();
+        }
+
         // If the snapshot has user data, then user is logged in
         if (snapshot.hasData) {
-          // User is logged in, navigate to home
+          // Check user-specific onboarding
+          if (!userHasSeenOnboarding) {
+            // User is logged in but hasn't seen user-specific onboarding
+            return const OnBoardingScreen2();
+          }
+          // User is logged in and has seen onboarding, go to home
           return const CustomBottomNavigationBar();
         }
 
         // User is not logged in
-        if (hasSeenOnboarding) {
-          // User has seen onboarding, go to login
+        if (hasSeenOnboardingOfApp) {
+          // User has seen app-level onboarding, go to login
           return const LoginScreen();
         } else {
-          // User hasn't seen onboarding, show onboarding
+          // User hasn't seen app-level onboarding, show onboarding
           return const OnBoardingScreen1();
         }
       },

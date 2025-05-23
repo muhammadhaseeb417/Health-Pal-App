@@ -76,6 +76,31 @@ class FirebaseDatabaseService {
     }
   }
 
+  // Fetch hasSeenOnboarding status for a user by UID
+  Future<bool> getHasSeenOnboarding(String userId) async {
+    try {
+      DocumentSnapshot doc = await usersCollection.doc(userId).get();
+      if (!doc.exists) {
+        throw Exception('User data not found');
+      }
+      Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+      return data['hasSeenOnboarding'] ?? false;
+    } catch (e) {
+      throw Exception('Failed to fetch onboarding status: ${e.toString()}');
+    }
+  }
+
+  // Set hasSeenOnboarding to true for a user by UID
+  Future<void> setHasSeenOnboarding(String userId) async {
+    try {
+      await usersCollection.doc(userId).update({
+        'hasSeenOnboarding': true,
+      });
+    } catch (e) {
+      throw Exception('Failed to set onboarding status: ${e.toString()}');
+    }
+  }
+
   // Stream user data as UserModel for real-time updates with error handling
   Stream<UserModel> streamUserData(String userId) {
     try {
