@@ -14,13 +14,16 @@ import 'package:health_pal/features/On%20Boarding/on_boarding_screen_3.dart';
 import 'package:health_pal/features/On%20Boarding/on_boarding_screen_5.dart';
 import 'package:health_pal/features/Profile/UI/profile_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:health_pal/utils/user_auth.dart';
+import 'package:health_pal/features/Authentication/services/user_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'features/Home/UI/home_screen_2.dart';
 import 'features/On Boarding/on_boarding_screen_4.dart';
-import '../firebase_options.dart'; // Import your UserAuth class
+import '../firebase_options.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+
+// Create a global instance or use dependency injection
+final UserAuth userAuth = UserAuth();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,7 +44,6 @@ class MyApp extends StatelessWidget {
 
   const MyApp({super.key, required this.hasSeenOnboarding});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -77,21 +79,28 @@ class MyApp extends StatelessWidget {
         "/location": (context) => const LocationScreen(),
         "/food_description_page": (context) => const FoodDescriptionPage(),
       },
-      // home: AuthenticationWrapper(hasSeenOnboarding: hasSeenOnboarding),
-      home: LocationScreen(),
+      home: AuthenticationWrapper(
+        hasSeenOnboarding: hasSeenOnboarding,
+        userAuth: userAuth, // Pass the instance
+      ),
     );
   }
 }
 
 class AuthenticationWrapper extends StatelessWidget {
   final bool hasSeenOnboarding;
+  final UserAuth userAuth; // Add this parameter
 
-  const AuthenticationWrapper({super.key, required this.hasSeenOnboarding});
+  const AuthenticationWrapper({
+    super.key, 
+    required this.hasSeenOnboarding,
+    required this.userAuth, // Require the instance
+  });
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<User?>(
-      stream: UserAuth.authStateChanges,
+      stream: userAuth.authStateChanges, // Use the instance
       builder: (context, snapshot) {
         // If the snapshot has user data, then user is logged in
         if (snapshot.hasData) {

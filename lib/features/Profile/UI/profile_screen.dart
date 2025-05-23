@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:health_pal/features/Profile/widgets/setting_menu_bar.dart';
+import 'package:health_pal/main.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -58,6 +59,7 @@ class ProfileScreen extends StatelessWidget {
                       title: "Log out",
                       icon: Icons.login,
                       function: () {
+                        userAuth.signOut();
                         Navigator.pushNamed(context, "/login");
                       },
                     ),

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
-import '../../../utils/constants/colors.dart';
-
 class LinearGaugeWidgetDetails extends StatelessWidget {
   final String title;
   final double gainedPortion;

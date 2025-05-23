@@ -1,0 +1,2 @@
+C:/Items For local disk/CS 2022 6th Semester/Mobile App Developement/health_pal/android/app/.cxx/Debug/5e345c58/x86_64/CMakeFiles/edit_cache.dir
+C:/Items For local disk/CS 2022 6th Semester/Mobile App Developement/health_pal/android/app/.cxx/Debug/5e345c58/x86_64/CMakeFiles/rebuild_cache.dir

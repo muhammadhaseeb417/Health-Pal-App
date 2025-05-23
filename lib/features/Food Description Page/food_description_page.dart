@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:health_pal/features/Food%20Description%20Page/widgets/food_description_gauge_style.dart';
 
 import '../../utils/constants/colors.dart';
-import '../Home/widgets/linear_gauge_widget_details.dart';
 
 class FoodDescriptionPage extends StatelessWidget {
   const FoodDescriptionPage({super.key});

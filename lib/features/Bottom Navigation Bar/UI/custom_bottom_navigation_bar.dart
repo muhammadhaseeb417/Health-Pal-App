@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:health_pal/features/About%20Us/UI/about_us_screen.dart';
 import 'package:health_pal/features/Add%20Food_or_Recipe/UI/add_food_screen.dart';
-import 'package:health_pal/features/Home/UI/home_screen.dart';
 import 'package:health_pal/features/Home/UI/home_screen_2.dart';
 import 'package:health_pal/features/Profile/UI/profile_screen.dart';
 
