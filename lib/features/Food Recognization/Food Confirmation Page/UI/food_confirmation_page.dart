@@ -62,12 +62,12 @@ class _FoodConfirmationPageState extends State<FoodConfirmationPage> {
     if (food == null) return;
 
     // For now, just show a confirmation message
+    // Return to the previous screen or navigate to a nutrition details screen
+    Navigator.of(context).pop();
+    Navigator.of(context).pop();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Selected: ${food['name']}')),
     );
-
-    // Return to the previous screen or navigate to a nutrition details screen
-    Navigator.of(context).pop();
   }
 
   @override
