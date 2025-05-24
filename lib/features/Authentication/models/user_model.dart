@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:health_pal/features/On%20Boarding/models/user_details_model.dart';
 
 class UserModel {
@@ -48,21 +49,40 @@ class UserModel {
       name: map['name'] ?? '',
       email: map['email'] ?? '',
       photoURL: map['photoURL'],
-      createdAt: map['createdAt'] != null
-          ? (map['createdAt'] is DateTime
-              ? map['createdAt']
-              : DateTime.parse(map['createdAt']))
-          : DateTime.now(),
-      lastLoginAt: map['lastLoginAt'] != null
-          ? (map['lastLoginAt'] is DateTime
-              ? map['lastLoginAt']
-              : DateTime.parse(map['lastLoginAt']))
-          : DateTime.now(),
+      createdAt: _parseDateTime(map['createdAt']),
+      lastLoginAt: _parseDateTime(map['lastLoginAt']),
       hasSeenOnboarding: map['hasSeenOnboarding'] ?? false,
       userDetails: map['userDetails'] != null
           ? UserDetails.fromMap(map['userDetails'])
           : null,
     );
+  }
+
+  // Helper method to parse DateTime from various formats
+  static DateTime _parseDateTime(dynamic dateValue) {
+    if (dateValue == null) {
+      return DateTime.now();
+    }
+
+    if (dateValue is Timestamp) {
+      return dateValue.toDate();
+    }
+
+    if (dateValue is DateTime) {
+      return dateValue;
+    }
+
+    if (dateValue is String) {
+      try {
+        return DateTime.parse(dateValue);
+      } catch (e) {
+        print('Error parsing date string: $dateValue, error: $e');
+        return DateTime.now();
+      }
+    }
+
+    print('Unknown date format: $dateValue (${dateValue.runtimeType})');
+    return DateTime.now();
   }
 
   // Convert UserModel to Map for Firestore
@@ -72,8 +92,8 @@ class UserModel {
       'name': name,
       'email': email,
       'photoURL': photoURL,
-      'createdAt': createdAt.toIso8601String(),
-      'lastLoginAt': lastLoginAt.toIso8601String(),
+      'createdAt': Timestamp.fromDate(createdAt),
+      'lastLoginAt': Timestamp.fromDate(lastLoginAt),
       'hasSeenOnboarding': hasSeenOnboarding,
       'userDetails': userDetails?.toMap(),
     };

@@ -96,9 +96,23 @@ class MyApp extends StatelessWidget {
         "/main_auth_screen": (context) => const MainAuthScreen(),
         "/onboard1": (context) => const OnBoardingScreen1(),
         "/onboard2": (context) => const OnBoardingScreen2(),
-        "/onboard3": (context) =>  OnBoardingScreen3(userDetails: UserDetails(age: 0, weight: 0, weightUnit: WeightUnit.kg, goal: Goal.loseWeight, gender: Gender.male, height: 0)),
+        "/onboard3": (context) => OnBoardingScreen3(
+            userDetails: UserDetails(
+                age: 0,
+                weight: 0,
+                weightUnit: WeightUnit.kg,
+                goal: Goal.loseWeight,
+                gender: Gender.male,
+                height: 0)),
         "/onboard4": (context) => const OnBoardingScreen4(),
-        "/onboard4next": (context) => OnBoardingScreen4Next(userDetails: UserDetails(age: 0, weight: 0, weightUnit: WeightUnit.kg, goal: Goal.loseWeight, gender: Gender.male, height: 0)),
+        "/onboard4next": (context) => OnBoardingScreen4Next(
+            userDetails: UserDetails(
+                age: 0,
+                weight: 0,
+                weightUnit: WeightUnit.kg,
+                goal: Goal.loseWeight,
+                gender: Gender.male,
+                height: 0)),
         "/onboard5": (context) => const OnBoardingScreen5(),
         "/login": (context) => const LoginScreen(),
         "/forgot_password": (context) => const ForgotPasswordScreen(),
@@ -145,7 +159,8 @@ class AuthenticationWrapper extends StatelessWidget {
           return FutureBuilder<bool>(
             future: _getUserOnboardingStatus(snapshot.data!.uid),
             builder: (context, onboardingSnapshot) {
-              if (onboardingSnapshot.connectionState == ConnectionState.waiting) {
+              if (onboardingSnapshot.connectionState ==
+                  ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
               }
 
@@ -158,31 +173,31 @@ class AuthenticationWrapper extends StatelessWidget {
 
               // User exists and onboarding status is fetched
               bool hasSeenOnboarding = onboardingSnapshot.data ?? false;
-              return hasSeenOnboarding 
-                  ? const CustomBottomNavigationBar() 
+              return hasSeenOnboarding
+                  ? const CustomBottomNavigationBar()
                   : const OnBoardingScreen2();
             },
           );
         }
 
         // User is NOT logged in
-        return hasSeenOnboardingOfApp 
-            ? const MainAuthScreen() 
+        return hasSeenOnboardingOfApp
+            ? const MainAuthScreen()
             : const OnBoardingScreen1();
       },
     );
   }
 
   Future<bool> _getUserOnboardingStatus(String uid) async {
-  try {
-    return await firebaseDatabaseService.getHasSeenOnboarding(uid);
-  } catch (e) {
-    if (e.toString().contains('User data not found')) {
-      // Wait 1 second for Firestore to catch up
-      await Future.delayed(Duration(seconds: 1));
+    try {
       return await firebaseDatabaseService.getHasSeenOnboarding(uid);
+    } catch (e) {
+      if (e.toString().contains('User data not found')) {
+        // Wait 1 second for Firestore to catch up
+        await Future.delayed(Duration(seconds: 1));
+        return await firebaseDatabaseService.getHasSeenOnboarding(uid);
+      }
+      rethrow;
     }
-    rethrow;
   }
-}
 }

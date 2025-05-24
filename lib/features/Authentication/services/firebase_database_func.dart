@@ -55,6 +55,67 @@ class FirebaseDatabaseService {
     }
   }
 
+  // Get current user data
+  Future<UserModel?> getCurrentUserData() async {
+    try {
+      if (currentUserId == null) return null;
+
+      DocumentSnapshot doc = await usersCollection.doc(currentUserId!).get();
+      if (!doc.exists) {
+        return null;
+      }
+      return UserModel.fromMap(doc.data() as Map<String, dynamic>);
+    } catch (e) {
+      throw Exception('Failed to get current user data: ${e.toString()}');
+    }
+  }
+
+  // Stream current user data for real-time updates
+  Stream<UserModel?> streamCurrentUserData() {
+    try {
+      if (currentUserId == null) {
+        return Stream.value(null);
+      }
+
+      return usersCollection
+          .doc(currentUserId!)
+          .snapshots()
+          .handleError((error) {
+        print('Error streaming current user data: $error');
+        throw Exception(
+            'Failed to stream current user data: ${error.toString()}');
+      }).map((snapshot) {
+        if (!snapshot.exists) {
+          return null;
+        }
+        return UserModel.fromMap(snapshot.data() as Map<String, dynamic>);
+      });
+    } catch (e) {
+      print('Error setting up current user data stream: $e');
+      throw Exception(
+          'Failed to set up current user data stream: ${e.toString()}');
+    }
+  }
+
+  // Update user profile (name, photoURL)
+  Future<void> updateUserProfile({String? name, String? photoURL}) async {
+    try {
+      if (currentUserId == null) {
+        throw Exception('No current user');
+      }
+
+      Map<String, dynamic> updateData = {};
+      if (name != null) updateData['name'] = name;
+      if (photoURL != null) updateData['photoURL'] = photoURL;
+
+      if (updateData.isNotEmpty) {
+        await usersCollection.doc(currentUserId!).update(updateData);
+      }
+    } catch (e) {
+      throw Exception('Failed to update user profile: ${e.toString()}');
+    }
+  }
+
   // Update user details in Firestore
   Future<void> updateUserDetails(String userId, UserDetails userDetails) async {
     try {
@@ -63,6 +124,18 @@ class FirebaseDatabaseService {
       });
     } catch (e) {
       throw Exception('Failed to update user details: ${e.toString()}');
+    }
+  }
+
+  // Update current user details
+  Future<void> updateCurrentUserDetails(UserDetails userDetails) async {
+    try {
+      if (currentUserId == null) {
+        throw Exception('No current user');
+      }
+      await updateUserDetails(currentUserId!, userDetails);
+    } catch (e) {
+      throw Exception('Failed to update current user details: ${e.toString()}');
     }
   }
 
