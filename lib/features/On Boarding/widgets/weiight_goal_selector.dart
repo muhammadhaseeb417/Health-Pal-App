@@ -1,30 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:health_pal/utils/constants/colors.dart';
 
-class WeightGoalSelector extends StatefulWidget {
-  final List<Map<String, String>> goals;
-  const WeightGoalSelector({Key? key, required this.goals}) : super(key: key);
-  @override
-  _WeightGoalSelectorState createState() => _WeightGoalSelectorState();
-}
+class WeightGoalSelector extends StatelessWidget {
+  final List<Map<String, dynamic>> goals; // Updated to include 'value'
+  final dynamic selectedValue;
+  final Function(dynamic)? onValueSelected;
 
-class _WeightGoalSelectorState extends State<WeightGoalSelector> {
-  String? selectedGoal;
+  const WeightGoalSelector({
+    Key? key,
+    required this.goals,
+    required this.selectedValue,
+    this.onValueSelected,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: widget.goals.map((goal) => _buildGoalTile(goal)).toList(),
+      children: goals.map((goal) => _buildGoalTile(goal)).toList(),
     );
   }
 
-  Widget _buildGoalTile(Map<String, String> goal) {
-    final isSelected = selectedGoal == goal['title'];
+  Widget _buildGoalTile(Map<String, dynamic> goal) {
+    final isSelected = selectedValue == goal['value'];
 
     return GestureDetector(
       onTap: () {
-        setState(() {
-          selectedGoal = goal['title'];
-        });
+        if (onValueSelected != null) {
+          onValueSelected!(goal['value']);
+        }
       },
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 15),
@@ -32,14 +35,14 @@ class _WeightGoalSelectorState extends State<WeightGoalSelector> {
         decoration: BoxDecoration(
           color: Colors.white,
           border: Border.all(
-            color: isSelected ? Colors.orange : Colors.grey,
+            color: isSelected ? CustomColors.greenColor : Colors.grey,
             width: isSelected ? 2.0 : 1.0,
           ),
           borderRadius: BorderRadius.circular(10.0),
           boxShadow: [
             if (isSelected)
               BoxShadow(
-                color: Colors.orange.withOpacity(0.5),
+                color: CustomColors.greenColor.withOpacity(0.5),
                 blurRadius: 10.0,
                 spreadRadius: 1.0,
               ),
@@ -55,7 +58,9 @@ class _WeightGoalSelectorState extends State<WeightGoalSelector> {
                 Text(
                   goal['title']!,
                   style: const TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.w500),
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ],
             ),
@@ -64,7 +69,7 @@ class _WeightGoalSelectorState extends State<WeightGoalSelector> {
               width: 24,
               height: 24,
               decoration: BoxDecoration(
-                color: isSelected ? Colors.orange : Colors.white,
+                color: isSelected ? CustomColors.greenColor : Colors.white,
                 border: Border.all(color: Colors.grey),
                 shape: BoxShape.circle,
               ),

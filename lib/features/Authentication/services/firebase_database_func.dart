@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:health_pal/features/On%20Boarding/models/user_details_model.dart';
 import 'dart:async';
 import '../models/user_model.dart';
 
@@ -51,6 +52,17 @@ class FirebaseDatabaseService {
       }
     } catch (e) {
       throw Exception('Failed to create user document: ${e.toString()}');
+    }
+  }
+
+  // Update user details in Firestore
+  Future<void> updateUserDetails(String userId, UserDetails userDetails) async {
+    try {
+      await usersCollection.doc(userId).update({
+        'userDetails': userDetails.toMap(),
+      });
+    } catch (e) {
+      throw Exception('Failed to update user details: ${e.toString()}');
     }
   }
 

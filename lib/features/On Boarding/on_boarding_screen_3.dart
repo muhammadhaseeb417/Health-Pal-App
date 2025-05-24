@@ -1,30 +1,47 @@
 import 'package:flutter/material.dart';
-import '../../utils/constants/colors.dart';
+import 'package:health_pal/features/On%20Boarding/models/user_details_model.dart';
+import 'package:health_pal/features/On%20Boarding/on_boarding_screen_4_next.dart';
+import 'package:health_pal/utils/constants/colors.dart';
 import 'widgets/bottom_buttons_in_onBoard.dart';
 import 'widgets/buttons_in_onBoard3.dart';
 import 'widgets/custom_header.dart';
 import 'widgets/weight_scale_widget.dart';
 
 class OnBoardingScreen3 extends StatefulWidget {
-  const OnBoardingScreen3({super.key});
+  final UserDetails userDetails;
+  const OnBoardingScreen3({super.key, required this.userDetails});
 
   @override
   State<OnBoardingScreen3> createState() => _OnBoardingScreen3State();
 }
 
 class _OnBoardingScreen3State extends State<OnBoardingScreen3> {
-  double _currentWeight = 62.0;
-  String _weightUnit = 'Kg';
+  late double _currentWeight;
+  late String _weightUnit;
+  late UserDetails userDetails;
+
+  @override
+  void initState() {
+    super.initState();
+    userDetails = widget.userDetails;
+    _currentWeight = userDetails.weight != 0 ? userDetails.weight : 62.0;
+    _weightUnit = userDetails.weightUnit == WeightUnit.kg ? 'Kg' : 'Lbs';
+  }
 
   void _updateWeight(double value) {
     setState(() {
       _currentWeight = value;
+      userDetails = userDetails.copyWith(weight: _currentWeight);
     });
   }
 
   void _toggleWeightUnit(String unit) {
     setState(() {
       _weightUnit = unit;
+      userDetails = userDetails.copyWith(
+        weightUnit: unit == 'Kg' ? WeightUnit.kg : WeightUnit.lbs,
+        weight: _currentWeight, // Preserve the current weight
+      );
     });
   }
 
@@ -97,7 +114,15 @@ class _OnBoardingScreen3State extends State<OnBoardingScreen3> {
             ),
             BottomButtonsInOnboard(
               bottomGreen: true,
-              onPressed: () => Navigator.pushNamed(context, '/onboard4'),
+              onPressed: () {
+                // Pass updated userDetails to the next screen
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => OnBoardingScreen4Next(userDetails: userDetails),
+                  ),
+                );
+              },
             ),
           ],
         ),

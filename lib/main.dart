@@ -10,9 +10,11 @@ import 'package:health_pal/features/Authentication/signup/UI/signup_screen.dart'
 import 'package:health_pal/features/Bottom%20Navigation%20Bar/UI/custom_bottom_navigation_bar.dart';
 import 'package:health_pal/features/Food%20Description%20Page/food_description_page.dart';
 import 'package:health_pal/features/Location/location_screen.dart';
+import 'package:health_pal/features/On%20Boarding/models/user_details_model.dart';
 import 'package:health_pal/features/On%20Boarding/on_boarding_screen_1.dart';
 import 'package:health_pal/features/On%20Boarding/on_boarding_screen_2.dart';
 import 'package:health_pal/features/On%20Boarding/on_boarding_screen_3.dart';
+import 'package:health_pal/features/On%20Boarding/on_boarding_screen_4_next.dart';
 import 'package:health_pal/features/On%20Boarding/on_boarding_screen_5.dart';
 import 'package:health_pal/features/Profile/UI/profile_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -94,8 +96,9 @@ class MyApp extends StatelessWidget {
         "/main_auth_screen": (context) => const MainAuthScreen(),
         "/onboard1": (context) => const OnBoardingScreen1(),
         "/onboard2": (context) => const OnBoardingScreen2(),
-        "/onboard3": (context) => const OnBoardingScreen3(),
+        "/onboard3": (context) =>  OnBoardingScreen3(userDetails: UserDetails(age: 0, weight: 0, weightUnit: WeightUnit.kg, goal: Goal.loseWeight, gender: Gender.male, height: 0)),
         "/onboard4": (context) => const OnBoardingScreen4(),
+        "/onboard4next": (context) => OnBoardingScreen4Next(userDetails: UserDetails(age: 0, weight: 0, weightUnit: WeightUnit.kg, goal: Goal.loseWeight, gender: Gender.male, height: 0)),
         "/onboard5": (context) => const OnBoardingScreen5(),
         "/login": (context) => const LoginScreen(),
         "/forgot_password": (context) => const ForgotPasswordScreen(),

@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:health_pal/features/Authentication/services/firebase_database_func.dart';
-import 'package:health_pal/features/On%20Boarding/widgets/custom_header.dart';
+import 'package:health_pal/features/On%20Boarding/models/user_details_model.dart';
+import 'package:health_pal/features/On%20Boarding/on_boarding_screen_3.dart';
 import 'package:health_pal/utils/constants/colors.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'widgets/bottom_buttons_in_onBoard.dart';
+import 'widgets/custom_header.dart';
 
 class OnBoardingScreen2 extends StatefulWidget {
-  const OnBoardingScreen2({super.key});
+  final UserDetails? userDetails; // Accept UserDetails as a parameter
+  const OnBoardingScreen2({super.key, this.userDetails});
 
   @override
   State<OnBoardingScreen2> createState() => _OnBoardingScreen2State();
@@ -18,10 +21,20 @@ class _OnBoardingScreen2State extends State<OnBoardingScreen2> {
       FixedExtentScrollController(initialItem: 0);
   bool _isCheckingOnboarding = true;
   final FirebaseDatabaseService _dbService = FirebaseDatabaseService();
+  late UserDetails userDetails;
 
   @override
   void initState() {
     super.initState();
+    // Initialize userDetails from widget or create a new one
+    userDetails = widget.userDetails ?? UserDetails(
+      age: 0,
+      weight: 0,
+      weightUnit: WeightUnit.kg,
+      goal: Goal.loseWeight,
+      gender: Gender.male,
+      height: 0,
+    );
     _checkOnboardingStatus();
   }
 
@@ -50,7 +63,6 @@ class _OnBoardingScreen2State extends State<OnBoardingScreen2> {
       return await _dbService.getHasSeenOnboarding(uid);
     } catch (e) {
       if (e.toString().contains('User data not found')) {
-        // Wait 1 second for Firestore to catch up
         await Future.delayed(Duration(seconds: 1));
         return await _dbService.getHasSeenOnboarding(uid);
       }
@@ -103,6 +115,7 @@ class _OnBoardingScreen2State extends State<OnBoardingScreen2> {
                         onSelectedItemChanged: (index) {
                           setState(() {
                             selectedAge = index + 1;
+                            userDetails = userDetails.copyWith(age: selectedAge);
                           });
                         },
                         childDelegate: ListWheelChildBuilderDelegate(
@@ -145,11 +158,25 @@ class _OnBoardingScreen2State extends State<OnBoardingScreen2> {
             ),
             // Bottom fixed buttons
             BottomButtonsInOnboard(
-              onPressed: () => Navigator.pushNamed(context, '/onboard3'),
+              onPressed: () {
+                // Pass updated userDetails to the next screen
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => OnBoardingScreen3(userDetails: userDetails),
+                  ),
+                );
+              },
             ),
           ],
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 }
