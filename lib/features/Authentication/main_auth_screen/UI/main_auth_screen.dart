@@ -1,9 +1,46 @@
 import 'package:flutter/material.dart';
-
+import 'package:health_pal/features/Authentication/services/user_auth.dart';
 import '../widgets/signup_with_widget.dart';
 
-class SplashScreen extends StatelessWidget {
-  const SplashScreen({super.key});
+class MainAuthScreen extends StatefulWidget {
+  const MainAuthScreen({super.key});
+
+  @override
+  State<MainAuthScreen> createState() => _MainAuthScreenState();
+}
+
+class _MainAuthScreenState extends State<MainAuthScreen> {
+  bool _isLoading = false;
+  final UserAuth userAuth = UserAuth();
+
+  Future<void> _handleGoogleSignIn(BuildContext context) async {
+    if (_isLoading) return;
+    
+    setState(() => _isLoading = true);
+    
+    try {
+      await userAuth.signInWithGoogle();
+      if (!mounted) return;
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Signed in with Google'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      Navigator.pushReplacementNamed(context, "/onboard2");
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Google Sign-In failed: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,20 +76,13 @@ class SplashScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   SignupWithWidget(
-                    btnFor: "FACEBOOK",
-                    icon: Icons.facebook,
-                    btnColor: Color.fromARGB(255, 4, 83, 148),
-                    callBack: () {},
-                  ),
-                  SizedBox(height: 15),
-                  SignupWithWidget(
                     btnFor: "GOOGLE",
                     imgPath: "assets/logo/google_logo.png",
-                    btnColor: Color.fromARGB(255, 197, 197, 197),
+                    btnColor: const Color.fromARGB(255, 197, 197, 197),
                     txtColor: Colors.black,
-                    callBack: () {},
+                    callBack: () => _handleGoogleSignIn(context),
                   ),
-                  SizedBox(height: 15),
+                  const SizedBox(height: 15),
                   SignupWithWidget(
                     btnFor: "EMAIL",
                     icon: Icons.mail,
@@ -61,11 +91,11 @@ class SplashScreen extends StatelessWidget {
                       Navigator.pushNamed(context, "/signup");
                     },
                   ),
-                  SizedBox(height: 15),
+                  const SizedBox(height: 15),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text('Already have an account ? '),
+                      const Text('Already have an account? '),
                       GestureDetector(
                         onTap: () => Navigator.pushNamed(context, "/login"),
                         child: const Text(
@@ -77,7 +107,7 @@ class SplashScreen extends StatelessWidget {
                         ),
                       ),
                     ],
-                  )
+                  ),
                 ],
               ),
             ],

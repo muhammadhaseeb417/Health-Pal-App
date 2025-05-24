@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:health_pal/features/Authentication/services/firebase_database_func.dart';
 import 'package:health_pal/features/On%20Boarding/widgets/custom_header.dart';
 import 'package:health_pal/utils/constants/colors.dart';
-
+import 'package:firebase_auth/firebase_auth.dart';
 import 'widgets/bottom_buttons_in_onBoard.dart';
 
 class OnBoardingScreen2 extends StatefulWidget {
@@ -14,10 +15,60 @@ class OnBoardingScreen2 extends StatefulWidget {
 class _OnBoardingScreen2State extends State<OnBoardingScreen2> {
   int selectedAge = 1;
   final FixedExtentScrollController _scrollController =
-      FixedExtentScrollController(initialItem: 0); // Start at age 1
+      FixedExtentScrollController(initialItem: 0);
+  bool _isCheckingOnboarding = true;
+  final FirebaseDatabaseService _dbService = FirebaseDatabaseService();
+
+  @override
+  void initState() {
+    super.initState();
+    _checkOnboardingStatus();
+  }
+
+  Future<void> _checkOnboardingStatus() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        bool hasSeenOnboarding = await _getUserOnboardingStatus(user.uid);
+        if (hasSeenOnboarding && mounted) {
+          Navigator.pushReplacementNamed(context, '/navbar');
+        }
+      }
+    } catch (e) {
+      print('Error checking onboarding status: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isCheckingOnboarding = false;
+        });
+      }
+    }
+  }
+
+  Future<bool> _getUserOnboardingStatus(String uid) async {
+    try {
+      return await _dbService.getHasSeenOnboarding(uid);
+    } catch (e) {
+      if (e.toString().contains('User data not found')) {
+        // Wait 1 second for Firestore to catch up
+        await Future.delayed(Duration(seconds: 1));
+        return await _dbService.getHasSeenOnboarding(uid);
+      }
+      rethrow;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (_isCheckingOnboarding) {
+      return Scaffold(
+        backgroundColor: Colors.white,
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -33,7 +84,7 @@ class _OnBoardingScreen2State extends State<OnBoardingScreen2> {
                       height: MediaQuery.of(context).size.height * 0.05,
                     ),
                     const Text(
-                      'What’s your Age?',
+                      'What\'s your Age?',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 30,

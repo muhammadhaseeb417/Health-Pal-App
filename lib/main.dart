@@ -2,8 +2,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:health_pal/features/About%20Us/UI/about_us_screen.dart';
-import 'package:health_pal/features/Authentication/main_auth_screen/UI/main_auth_screen.dart';
+import 'package:health_pal/features/Authentication/forget_passward/forget_password_screen.dart';
 import 'package:health_pal/features/Authentication/login/UI/login_screen.dart';
+import 'package:health_pal/features/Authentication/main_auth_screen/UI/main_auth_screen.dart';
 import 'package:health_pal/features/Authentication/services/firebase_database_func.dart';
 import 'package:health_pal/features/Authentication/signup/UI/signup_screen.dart';
 import 'package:health_pal/features/Bottom%20Navigation%20Bar/UI/custom_bottom_navigation_bar.dart';
@@ -90,13 +91,14 @@ class MyApp extends StatelessWidget {
       ),
       debugShowCheckedModeBanner: false,
       routes: {
-        "/splash": (context) => const SplashScreen(),
+        "/main_auth_screen": (context) => const MainAuthScreen(),
         "/onboard1": (context) => const OnBoardingScreen1(),
         "/onboard2": (context) => const OnBoardingScreen2(),
         "/onboard3": (context) => const OnBoardingScreen3(),
         "/onboard4": (context) => const OnBoardingScreen4(),
         "/onboard5": (context) => const OnBoardingScreen5(),
         "/login": (context) => const LoginScreen(),
+        "/forgot_password": (context) => const ForgotPasswordScreen(),
         "/home": (context) => const HomeScreentwo(),
         "/aboutus": (context) => const AboutUsScreen(),
         "/navbar": (context) => const CustomBottomNavigationBar(),
@@ -132,30 +134,52 @@ class AuthenticationWrapper extends StatelessWidget {
       stream: userAuth.authStateChanges,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          // Show splash screen while waiting for auth state
-          return const CircularProgressIndicator();
+          return const Center(child: CircularProgressIndicator());
         }
 
-        // If the snapshot has user data, then user is logged in
+        // User is logged in
         if (snapshot.hasData) {
-          // Check user-specific onboarding
-          if (!userHasSeenOnboarding) {
-            // User is logged in but hasn't seen user-specific onboarding
-            return const OnBoardingScreen2();
-          }
-          // User is logged in and has seen onboarding, go to home
-          return const CustomBottomNavigationBar();
+          return FutureBuilder<bool>(
+            future: _getUserOnboardingStatus(snapshot.data!.uid),
+            builder: (context, onboardingSnapshot) {
+              if (onboardingSnapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              // Handle errors (e.g., user document not found)
+              if (onboardingSnapshot.hasError) {
+                print('Onboarding error: ${onboardingSnapshot.error}');
+                // For new users, default to showing onboarding
+                return const OnBoardingScreen2();
+              }
+
+              // User exists and onboarding status is fetched
+              bool hasSeenOnboarding = onboardingSnapshot.data ?? false;
+              return hasSeenOnboarding 
+                  ? const CustomBottomNavigationBar() 
+                  : const OnBoardingScreen2();
+            },
+          );
         }
 
-        // User is not logged in
-        if (hasSeenOnboardingOfApp) {
-          // User has seen app-level onboarding, go to login
-          return const LoginScreen();
-        } else {
-          // User hasn't seen app-level onboarding, show onboarding
-          return const OnBoardingScreen1();
-        }
+        // User is NOT logged in
+        return hasSeenOnboardingOfApp 
+            ? const MainAuthScreen() 
+            : const OnBoardingScreen1();
       },
     );
   }
+
+  Future<bool> _getUserOnboardingStatus(String uid) async {
+  try {
+    return await firebaseDatabaseService.getHasSeenOnboarding(uid);
+  } catch (e) {
+    if (e.toString().contains('User data not found')) {
+      // Wait 1 second for Firestore to catch up
+      await Future.delayed(Duration(seconds: 1));
+      return await firebaseDatabaseService.getHasSeenOnboarding(uid);
+    }
+    rethrow;
+  }
+}
 }

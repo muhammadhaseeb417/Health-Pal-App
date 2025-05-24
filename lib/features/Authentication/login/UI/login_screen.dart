@@ -17,7 +17,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final UserAuth _userAuth = UserAuth();
   final FirebaseDatabaseService _dbService = FirebaseDatabaseService();
   bool _isLoading = false;
-  
+
   // Check connectivity status
   Future<bool> _checkConnectivity() async {
     var connectivityResult = await (Connectivity().checkConnectivity());
@@ -61,17 +61,22 @@ class _LoginScreenState extends State<LoginScreen> {
                 isPasswordField: true,
               ),
               const SizedBox(height: 10),
-              const Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Text(
-                    'Forget Password',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
+              InkWell(
+                onTap: () {
+                  Navigator.pushNamed(context, '/forgot_password');
+                },
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text(
+                      'Forget Password',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
               const SizedBox(height: 50),
               SizedBox(
@@ -80,14 +85,15 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: ElevatedButton(
                   onPressed: () async {
                     if (_isLoading) return;
-                    
+
                     setState(() {
                       _isLoading = true;
                     });
-                    
+
                     try {
                       // Validate inputs
-                      if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+                      if (_emailController.text.isEmpty ||
+                          _passwordController.text.isEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text('Please enter email and password'),
@@ -95,44 +101,44 @@ class _LoginScreenState extends State<LoginScreen> {
                         );
                         return;
                       }
-                      
+
                       // Check connectivity
                       bool isConnected = await _checkConnectivity();
                       if (!isConnected) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                            content: Text('No internet connection. Your data will sync when connected.'),
+                            content: Text(
+                                'No internet connection. Your data will sync when connected.'),
                             duration: Duration(seconds: 3),
                           ),
                         );
                       }
-                      
+
                       // Get user input data
                       String email = _emailController.text.trim();
                       String password = _passwordController.text;
-                      
+
                       // Login user
-                      final credential = await _userAuth.signInWithEmailPassword(
-                        email, 
-                        password
-                      );
-                      
+                      final credential = await _userAuth
+                          .signInWithEmailPassword(email, password);
+
                       if (credential != null && credential.user != null) {
                         // Sync pending data if connected
                         if (isConnected) {
                           await _dbService.syncPendingData();
                         }
-                        
+
                         try {
                           // Simply update the last login time
-                          await _dbService.updateUserData(credential.user!.uid, {
+                          await _dbService
+                              .updateUserData(credential.user!.uid, {
                             'lastLoginAt': DateTime.now().toIso8601String(),
                           });
                         } catch (e) {
                           print('Error updating user login time: $e');
                           // Still proceed with login even if updating time fails
                         }
-                        
+
                         // Navigate to home screen
                         if (!mounted) return;
                         Navigator.pushReplacementNamed(context, "/navbar");
@@ -177,7 +183,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     style: TextStyle(fontSize: 17),
                   ),
                   GestureDetector(
-                    onTap: () => Navigator.pushNamed(context, "/splash"),
+                    onTap: () =>
+                        Navigator.pushNamed(context, "/main_auth_screen"),
                     child: const Text(
                       'Sign Up',
                       style: TextStyle(

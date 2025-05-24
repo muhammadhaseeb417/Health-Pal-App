@@ -1,9 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:health_pal/features/Authentication/services/firebase_database_func.dart';
+import 'package:health_pal/features/On%20Boarding/models/user_details_model.dart';
 
 class UserAuth {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final FirebaseDatabaseService _databaseService = FirebaseDatabaseService();
 
   // Get current user
   User? get currentUser => _auth.currentUser;
@@ -12,10 +15,16 @@ class UserAuth {
   Stream<User?> get authStateChanges => _auth.authStateChanges();
 
   // Sign up with email and password
-  Future<UserCredential?> signUpWithEmailPassword(String email, String password) async {
+  Future<UserCredential?> signUpWithEmailPassword(
+      String email, String password) async {
     try {
       UserCredential credential = await _auth.createUserWithEmailAndPassword(
           email: email, password: password);
+      // Save user to Firestore
+      await _databaseService.createUserDocument(
+        credential.user!,
+        name: credential.user!.displayName ?? 'User',
+      );
       return credential;
     } on FirebaseAuthException catch (e) {
       throw _handleFirebaseAuthException(e);
@@ -23,7 +32,8 @@ class UserAuth {
   }
 
   // Sign in with email and password
-  Future<UserCredential?> signInWithEmailPassword(String email, String password) async {
+  Future<UserCredential?> signInWithEmailPassword(
+      String email, String password) async {
     try {
       UserCredential credential = await _auth.signInWithEmailAndPassword(
           email: email, password: password);
@@ -34,32 +44,37 @@ class UserAuth {
   }
 
   // Sign in with Google
-  Future<UserCredential?> signInWithGoogle() async {
-    try {
-      // Trigger the authentication flow
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      
-      if (googleUser == null) {
-        throw Exception('Google sign in canceled by user');
-      }
+  // In UserAuth class
+Future<UserCredential?> signInWithGoogle() async {
+  try {
+    final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+    if (googleUser == null) throw Exception('Google sign-in canceled');
 
-      // Obtain the auth details from the request
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+    final GoogleSignInAuthentication googleAuth = 
+        await googleUser.authentication;
+    final credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
 
-      // Create a new credential
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
+    // Sign in to Firebase
+    final userCredential = await _auth.signInWithCredential(credential);
 
-      // Sign in to Firebase with the Google credential
-      return await _auth.signInWithCredential(credential);
-    } on FirebaseAuthException catch (e) {
-      throw _handleFirebaseAuthException(e);
-    } catch (e) {
-      throw Exception('Failed to sign in with Google: ${e.toString()}');
-    }
+    // WAIT for Firestore document to be created
+    await _databaseService.createUserDocument(
+      userCredential.user!,
+      name: googleUser.displayName ?? 'User',
+      additionalData: {
+        'photoURL': googleUser.photoUrl,
+        'hasSeenOnboarding': false, // Explicitly set for new users
+      },
+    );
+
+    return userCredential;
+  } catch (e) {
+    throw Exception('Google sign-in failed: $e');
   }
+}
 
   // Send password reset email
   Future<void> sendPasswordResetEmail(String email) async {
@@ -81,7 +96,8 @@ class UserAuth {
   }
 
   // Update user profile
-  Future<void> updateUserProfile({String? displayName, String? photoURL}) async {
+  Future<void> updateUserProfile(
+      {String? displayName, String? photoURL}) async {
     try {
       await _auth.currentUser?.updateDisplayName(displayName);
       await _auth.currentUser?.updatePhotoURL(photoURL);
@@ -91,17 +107,18 @@ class UserAuth {
   }
 
   // Change password
-  Future<void> changePassword(String currentPassword, String newPassword) async {
+  Future<void> changePassword(
+      String currentPassword, String newPassword) async {
     try {
       final user = _auth.currentUser;
       if (user == null) throw Exception('No user signed in');
-      
+
       // Re-authenticate the user before changing password
       AuthCredential credential = EmailAuthProvider.credential(
         email: user.email!,
         password: currentPassword,
       );
-      
+
       await user.reauthenticateWithCredential(credential);
       await user.updatePassword(newPassword);
     } on FirebaseAuthException catch (e) {
@@ -119,17 +136,17 @@ class UserAuth {
     try {
       final user = _auth.currentUser;
       if (user == null) throw Exception('No user signed in');
-      
+
       if (user.email != null) {
         // Re-authenticate the user before deleting
         AuthCredential credential = EmailAuthProvider.credential(
           email: user.email!,
           password: password,
         );
-        
+
         await user.reauthenticateWithCredential(credential);
       }
-      
+
       await user.delete();
     } on FirebaseAuthException catch (e) {
       throw _handleFirebaseAuthException(e);
@@ -154,7 +171,8 @@ class UserAuth {
       case 'requires-recent-login':
         return Exception('Please sign in again before retrying this request');
       case 'account-exists-with-different-credential':
-        return Exception('An account already exists with the same email but different sign-in credentials');
+        return Exception(
+            'An account already exists with the same email but different sign-in credentials');
       case 'invalid-credential':
         return Exception('The credential is malformed or has expired');
       case 'user-disabled':
