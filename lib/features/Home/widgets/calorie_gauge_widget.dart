@@ -1,16 +1,70 @@
 import 'package:flutter/material.dart';
+import 'package:health_pal/features/Authentication/services/firebase_database_func.dart';
+import 'package:health_pal/features/Profile/models/nutrition_settings_model.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
 import '../../../utils/constants/colors.dart';
 import 'linear_gauge_widget_details.dart';
 
-class CalorieGaugeWidget extends StatelessWidget {
-  const CalorieGaugeWidget({super.key});
+class CalorieGaugeWidget extends StatefulWidget {
+  final int calories;
+  final int maxCalories;
+  final double proteins;
+  final double carbs;
+  final double fats;
+
+  const CalorieGaugeWidget({
+    super.key,
+    required this.calories,
+    required this.maxCalories,
+    required this.proteins,
+    required this.carbs,
+    required this.fats,
+  });
 
   @override
+  State<CalorieGaugeWidget> createState() => _CalorieGaugeWidgetState();
+}
+
+class _CalorieGaugeWidgetState extends State<CalorieGaugeWidget> {
+  // Local variables to store the nutrition settings
+  late int _maxCalories;
+  late double _proteinTarget;
+  late double _carbsTarget;
+  late double _fatsTarget;
+  
+  @override
+  void initState() {
+    super.initState();
+    // Initialize with the passed values
+    _maxCalories = widget.maxCalories;
+    _proteinTarget = 90.0; // Default values
+    _carbsTarget = 110.0;
+    _fatsTarget = 70.0;
+    _loadNutritionSettings();
+  }
+
+  Future<void> _loadNutritionSettings() async {
+    try {
+      final FirebaseDatabaseService _databaseService = FirebaseDatabaseService();
+      final settings = await _databaseService.getNutritionSettings();
+      
+      setState(() {
+        // Update local variables with user settings
+        _maxCalories = settings.dailyCalorieTarget;
+        _proteinTarget = settings.proteinTarget;
+        _carbsTarget = settings.carbsTarget;
+        _fatsTarget = settings.fatsTarget;
+      });
+    } catch (e) {
+      print('Failed to load nutrition settings: $e');
+      // Continue with default values
+    }
+  }
+  @override
   Widget build(BuildContext context) {
-    final double currentCalories = 1721;
-    final double goalCalories = 2213;
+    final double currentCalories = widget.calories.toDouble();
+    final double goalCalories = _maxCalories.toDouble();
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -74,20 +128,20 @@ class CalorieGaugeWidget extends StatelessWidget {
                           children: [
                             LinearGaugeWidgetDetails(
                               title: "Protein",
-                              gainedPortion: 78,
-                              totalPortion: 90,
+                              gainedPortion: widget.proteins,
+                              totalPortion: _proteinTarget, // Using dynamic target
                               gaugeColor: CustomColors.greenColor,
                             ),
                             LinearGaugeWidgetDetails(
                               title: "Fats",
-                              gainedPortion: 45,
-                              totalPortion: 70,
+                              gainedPortion: widget.fats,
+                              totalPortion: _fatsTarget, // Using dynamic target
                               gaugeColor: CustomColors.orangeColor,
                             ),
                             LinearGaugeWidgetDetails(
                               title: "Carbs",
-                              gainedPortion: 95,
-                              totalPortion: 110,
+                              gainedPortion: widget.carbs,
+                              totalPortion: _carbsTarget, // Using dynamic target
                               gaugeColor: CustomColors.yellowColor,
                             ),
                           ],

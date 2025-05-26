@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:health_pal/features/On%20Boarding/models/user_details_model.dart';
+import 'package:health_pal/features/Profile/models/nutrition_settings_model.dart';
 import 'dart:async';
 import '../models/user_model.dart';
 
@@ -310,4 +311,40 @@ class FirebaseDatabaseService {
       return false; // Assume not connected if there's an error
     }
   }
+
+  // Update nutrition settings for the current user
+Future<void> updateNutritionSettings(NutritionSettings settings) async {
+  try {
+    if (currentUserId == null) {
+      throw Exception('No current user');
+    }
+    
+    await usersCollection.doc(currentUserId).update({
+      'nutritionSettings': settings.toMap(),
+    });
+  } catch (e) {
+    throw Exception('Failed to update nutrition settings: ${e.toString()}');
+  }
+}
+
+// Get nutrition settings for the current user
+Future<NutritionSettings> getNutritionSettings() async {
+  try {
+    if (currentUserId == null) {
+      throw Exception('No current user');
+    }
+    
+    DocumentSnapshot doc = await usersCollection.doc(currentUserId).get();
+    if (!doc.exists) {
+      return NutritionSettings(); // Return default settings if user doc doesn't exist
+    }
+    
+    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+    return NutritionSettings.fromMap(data['nutritionSettings']);
+  } catch (e) {
+    // Return default settings on error
+    print('Failed to get nutrition settings: ${e.toString()}');
+    return NutritionSettings();
+  }
+}
 }

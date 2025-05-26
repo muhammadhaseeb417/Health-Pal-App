@@ -20,19 +20,20 @@ class _SignupScreenState extends State<SignupScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
   final UserAuth _userAuth = UserAuth();
   final FirebaseDatabaseService _dbService = FirebaseDatabaseService();
   final ImagePicker _imagePicker = ImagePicker();
   bool _isLoading = false;
-  XFile? _selectedImage;  // To store the selected image
-  
+  XFile? _selectedImage; // To store the selected image
+
   // Check connectivity status
   Future<bool> _checkConnectivity() async {
     var connectivityResult = await (Connectivity().checkConnectivity());
     return connectivityResult != ConnectivityResult.none;
   }
-  
+
   // Pick image from gallery
   Future<void> _pickImage() async {
     try {
@@ -42,7 +43,7 @@ class _SignupScreenState extends State<SignupScreen> {
         maxHeight: 512,
         imageQuality: 75,
       );
-      
+
       if (image != null) {
         setState(() {
           _selectedImage = image;
@@ -57,20 +58,22 @@ class _SignupScreenState extends State<SignupScreen> {
       }
     }
   }
-  
+
   // Upload image to Firebase Storage
   Future<String?> _uploadImage() async {
     if (_selectedImage == null) return null;
-    
+
     try {
       final File imageFile = File(_selectedImage!.path);
-      final String fileName = 'profile_${DateTime.now().millisecondsSinceEpoch}.jpg';
-      final Reference storageRef = FirebaseStorage.instance.ref().child('profile_images/$fileName');
-      
+      final String fileName =
+          'profile_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final Reference storageRef =
+          FirebaseStorage.instance.ref().child('profile_images/$fileName');
+
       // Upload the file
       final UploadTask uploadTask = storageRef.putFile(imageFile);
       final TaskSnapshot taskSnapshot = await uploadTask;
-      
+
       // Get download URL
       final String downloadUrl = await taskSnapshot.ref.getDownloadURL();
       return downloadUrl;
@@ -82,7 +85,6 @@ class _SignupScreenState extends State<SignupScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
@@ -125,11 +127,12 @@ class _SignupScreenState extends State<SignupScreen> {
                       CircleAvatar(
                         radius: 50,
                         backgroundColor: Colors.grey[300],
-                        backgroundImage: _selectedImage != null 
-                            ? FileImage(File(_selectedImage!.path)) 
+                        backgroundImage: _selectedImage != null
+                            ? FileImage(File(_selectedImage!.path))
                             : null,
                         child: _selectedImage == null
-                            ? const Icon(Icons.person, size: 50, color: Colors.grey)
+                            ? const Icon(Icons.person,
+                                size: 50, color: Colors.grey)
                             : null,
                       ),
                       Positioned(
@@ -166,7 +169,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 regExp: RegExp(r'^[a-zA-Z ]+$'),
                 controller: _nameController,
               ),
-              
+
               const SizedBox(height: 20),
               CustomTextField(
                 textFieldFor: "Email",
@@ -198,14 +201,14 @@ class _SignupScreenState extends State<SignupScreen> {
                 child: ElevatedButton(
                   onPressed: () async {
                     if (_isLoading) return;
-                    
+
                     setState(() {
                       _isLoading = true;
                     });
-                    
+
                     try {
                       print("Sign Up button pressed");
-                      
+
                       // Validate inputs
                       if (_nameController.text.isEmpty ||
                           _emailController.text.isEmpty ||
@@ -218,55 +221,55 @@ class _SignupScreenState extends State<SignupScreen> {
                         );
                         return;
                       }
-                      
-                      if (_passwordController.text != _confirmPasswordController.text) {
+
+                      if (_passwordController.text !=
+                          _confirmPasswordController.text) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                            content: Text('Password and Confirm Password do not match'),
+                            content: Text(
+                                'Password and Confirm Password do not match'),
                           ),
                         );
                         return;
                       }
-                      
+
                       // Check connectivity
                       bool isConnected = await _checkConnectivity();
                       if (!isConnected) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                            content: Text('No internet connection. Please try again when connected.'),
+                            content: Text(
+                                'No internet connection. Please try again when connected.'),
                             duration: Duration(seconds: 3),
                           ),
                         );
                         return;
                       }
-                      
+
                       // Get user input data
                       String name = _nameController.text.trim();
                       String email = _emailController.text.trim();
-                      
+
                       // Upload profile image if selected
                       String? photoURL;
                       if (_selectedImage != null) {
                         photoURL = await _uploadImage();
                       }
-                      
+
                       // Sign up user
-                      final credential = await _userAuth.signUpWithEmailPassword(
-                        email, 
-                        _passwordController.text
-                      );
-                      
+                      final credential =
+                          await _userAuth.signUpWithEmailPassword(
+                              email, _passwordController.text);
+
                       if (credential != null && credential.user != null) {
                         // Create user document with UserModel
-                        await _dbService.createUserDocument(
-                          credential.user!,
-                          name: name,
-                          additionalData: {
-                            "photoURL": photoURL,
-                            "createdAt": DateTime.now().toIso8601String(),
-                          }
-                        );
-                        
+                        await _dbService.createUserDocument(credential.user!,
+                            name: name,
+                            additionalData: {
+                              "photoURL": photoURL,
+                              "createdAt": DateTime.now().toIso8601String(),
+                            });
+
                         // Update user profile with photo URL
                         if (photoURL != null) {
                           await _userAuth.updateUserProfile(
@@ -274,10 +277,10 @@ class _SignupScreenState extends State<SignupScreen> {
                             photoURL: photoURL,
                           );
                         }
-                        
+
                         // Check sync status and update if needed
                         await _dbService.syncPendingData();
-                        
+
                         // Navigate to home screen
                         if (!mounted) return;
                         Navigator.pushReplacementNamed(context, "/navbar");

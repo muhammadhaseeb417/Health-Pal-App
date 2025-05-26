@@ -16,6 +16,7 @@ import 'package:health_pal/features/On%20Boarding/on_boarding_screen_2.dart';
 import 'package:health_pal/features/On%20Boarding/on_boarding_screen_3.dart';
 import 'package:health_pal/features/On%20Boarding/on_boarding_screen_4_next.dart';
 import 'package:health_pal/features/On%20Boarding/on_boarding_screen_5.dart';
+import 'package:health_pal/features/Profile/UI/daily_intake_screen.dart';
 import 'package:health_pal/features/Profile/UI/profile_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:health_pal/features/Authentication/services/user_auth.dart';
@@ -123,6 +124,7 @@ class MyApp extends StatelessWidget {
         "/signup": (context) => const SignupScreen(),
         "/location": (context) => const LocationScreen(),
         "/food_description_page": (context) => const FoodDescriptionPage(),
+        '/daily_intake': (context) => const DailyIntakeScreen(),
       },
       home: AuthenticationWrapper(
         hasSeenOnboardingOfApp: hasSeenOnboardingOfApp,
@@ -175,7 +177,7 @@ class AuthenticationWrapper extends StatelessWidget {
               bool hasSeenOnboarding = onboardingSnapshot.data ?? false;
               return hasSeenOnboarding
                   ? const CustomBottomNavigationBar()
-                  : const OnBoardingScreen2();
+                  : const OnBoardingScreen2(); // data input
             },
           );
         }

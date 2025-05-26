@@ -117,12 +117,12 @@ class ProfileScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 12),
                         SettingMenuBar(
-                          title: "Daily Intake",
-                          icon: Icons.person,
-                          function: () {
-                            Navigator.pushNamed(context, '/daily_intake');
-                          },
-                        ),
+  title: "Daily Intake",
+  icon: Icons.person,
+  function: () {
+    Navigator.pushNamed(context, '/daily_intake');
+  },
+),
                         const SizedBox(height: 12),
                         SettingMenuBar(
                           title: "My Meals",

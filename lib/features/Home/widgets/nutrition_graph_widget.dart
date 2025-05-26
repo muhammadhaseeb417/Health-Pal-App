@@ -3,6 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:health_pal/utils/constants/colors.dart';
 
 class NutritionGraph extends StatelessWidget {
+  final double proteins;
+  final double carbs;
+  final double fats;
+
+  const NutritionGraph({
+    Key? key,
+    this.proteins = 0.0,
+    this.carbs = 0.0,
+    this.fats = 0.0,
+  }) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -128,7 +139,7 @@ class NutritionGraph extends StatelessWidget {
                     return touchedSpots.map((spot) {
                       if (spot.x == 3) {
                         return LineTooltipItem(
-                          "Fat    40g\nCarbs 20g\nProtein 4g",
+                          "Fat    ${fats.toStringAsFixed(1)}g\nCarbs ${carbs.toStringAsFixed(1)}g\nProtein ${proteins.toStringAsFixed(1)}g",
                           TextStyle(
                               color: Colors.white, fontWeight: FontWeight.bold),
                         );

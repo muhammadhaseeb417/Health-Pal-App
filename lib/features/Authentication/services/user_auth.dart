@@ -45,36 +45,36 @@ class UserAuth {
 
   // Sign in with Google
   // In UserAuth class
-Future<UserCredential?> signInWithGoogle() async {
-  try {
-    final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-    if (googleUser == null) throw Exception('Google sign-in canceled');
+  Future<UserCredential?> signInWithGoogle() async {
+    try {
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      if (googleUser == null) throw Exception('Google sign-in canceled');
 
-    final GoogleSignInAuthentication googleAuth = 
-        await googleUser.authentication;
-    final credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth.accessToken,
-      idToken: googleAuth.idToken,
-    );
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
 
-    // Sign in to Firebase
-    final userCredential = await _auth.signInWithCredential(credential);
+      // Sign in to Firebase
+      final userCredential = await _auth.signInWithCredential(credential);
 
-    // WAIT for Firestore document to be created
-    await _databaseService.createUserDocument(
-      userCredential.user!,
-      name: googleUser.displayName ?? 'User',
-      additionalData: {
-        'photoURL': googleUser.photoUrl,
-        'hasSeenOnboarding': false, // Explicitly set for new users
-      },
-    );
+      // WAIT for Firestore document to be created
+      await _databaseService.createUserDocument(
+        userCredential.user!,
+        name: googleUser.displayName ?? 'User',
+        additionalData: {
+          'photoURL': googleUser.photoUrl,
+          'hasSeenOnboarding': false, // Explicitly set for new users
+        },
+      );
 
-    return userCredential;
-  } catch (e) {
-    throw Exception('Google sign-in failed: $e');
+      return userCredential;
+    } catch (e) {
+      throw Exception('Google sign-in failed: $e');
+    }
   }
-}
 
   // Send password reset email
   Future<void> sendPasswordResetEmail(String email) async {
@@ -101,26 +101,6 @@ Future<UserCredential?> signInWithGoogle() async {
     try {
       await _auth.currentUser?.updateDisplayName(displayName);
       await _auth.currentUser?.updatePhotoURL(photoURL);
-    } on FirebaseAuthException catch (e) {
-      throw _handleFirebaseAuthException(e);
-    }
-  }
-
-  // Change password
-  Future<void> changePassword(
-      String currentPassword, String newPassword) async {
-    try {
-      final user = _auth.currentUser;
-      if (user == null) throw Exception('No user signed in');
-
-      // Re-authenticate the user before changing password
-      AuthCredential credential = EmailAuthProvider.credential(
-        email: user.email!,
-        password: currentPassword,
-      );
-
-      await user.reauthenticateWithCredential(credential);
-      await user.updatePassword(newPassword);
     } on FirebaseAuthException catch (e) {
       throw _handleFirebaseAuthException(e);
     }

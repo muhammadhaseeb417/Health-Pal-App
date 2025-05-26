@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:health_pal/features/On%20Boarding/models/user_details_model.dart';
+import 'package:health_pal/features/Profile/models/nutrition_settings_model.dart';
 
 class UserModel {
   final String uid;
@@ -11,6 +12,7 @@ class UserModel {
   final DateTime lastLoginAt;
   final bool hasSeenOnboarding;
   final UserDetails? userDetails;
+  final NutritionSettings nutritionSettings;
 
   UserModel({
     required this.uid,
@@ -21,15 +23,18 @@ class UserModel {
     DateTime? lastLoginAt,
     required this.hasSeenOnboarding,
     this.userDetails,
+    NutritionSettings? nutritionSettings,
   })  : this.createdAt = createdAt ?? DateTime.now(),
-        this.lastLoginAt = lastLoginAt ?? DateTime.now();
+        this.lastLoginAt = lastLoginAt ?? DateTime.now(),
+        this.nutritionSettings = nutritionSettings ?? NutritionSettings();
 
   // Create a UserModel from Firebase User and additional data
   factory UserModel.fromUser(User user,
       {required String name,
       String? photoURL,
       bool hasSeenOnboarding = false,
-      UserDetails? userDetails}) {
+      UserDetails? userDetails,
+      NutritionSettings? nutritionSettings}) {
     return UserModel(
       uid: user.uid,
       name: name,
@@ -39,6 +44,7 @@ class UserModel {
       lastLoginAt: DateTime.now(),
       hasSeenOnboarding: hasSeenOnboarding,
       userDetails: userDetails,
+      nutritionSettings: nutritionSettings,
     );
   }
 
@@ -54,6 +60,9 @@ class UserModel {
       hasSeenOnboarding: map['hasSeenOnboarding'] ?? false,
       userDetails: map['userDetails'] != null
           ? UserDetails.fromMap(map['userDetails'])
+          : null,
+      nutritionSettings: map['nutritionSettings'] != null
+          ? NutritionSettings.fromMap(map['nutritionSettings'])
           : null,
     );
   }
@@ -96,6 +105,7 @@ class UserModel {
       'lastLoginAt': Timestamp.fromDate(lastLoginAt),
       'hasSeenOnboarding': hasSeenOnboarding,
       'userDetails': userDetails?.toMap(),
+      'nutritionSettings': nutritionSettings.toMap(),
     };
   }
 
@@ -109,6 +119,7 @@ class UserModel {
     DateTime? lastLoginAt,
     bool? hasSeenOnboarding,
     UserDetails? userDetails,
+    NutritionSettings? nutritionSettings,
   }) {
     return UserModel(
       uid: uid ?? this.uid,
@@ -119,6 +130,7 @@ class UserModel {
       lastLoginAt: lastLoginAt ?? this.lastLoginAt,
       hasSeenOnboarding: hasSeenOnboarding ?? this.hasSeenOnboarding,
       userDetails: userDetails ?? this.userDetails,
+      nutritionSettings: nutritionSettings ?? this.nutritionSettings,
     );
   }
 
@@ -129,6 +141,6 @@ class UserModel {
 
   @override
   String toString() {
-    return 'UserModel(uid: $uid, name: $name, email: $email, hasSeenOnboarding: $hasSeenOnboarding, userDetails: $userDetails)';
+    return 'UserModel(uid: $uid, name: $name, email: $email, hasSeenOnboarding: $hasSeenOnboarding, userDetails: $userDetails, nutritionSettings: $nutritionSettings)';
   }
 }
