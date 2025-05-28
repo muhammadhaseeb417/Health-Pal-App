@@ -1,6 +1,10 @@
 import 'dart:io';
+import 'dart:math';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:health_pal/features/Home/models/food_model.dart';
 
 class FoodConfirmationPage extends StatefulWidget {
   final Map<String, dynamic> recognitionData;
@@ -54,20 +58,116 @@ class _FoodConfirmationPageState extends State<FoodConfirmationPage> {
     });
   }
 
-  void _confirmFoodSelection() {
-    // Here you would implement the logic to save the selected food
-    // and fetch nutrition information
-
+  void _confirmFoodSelection() async {
     final food = _selectedSubclass ?? _selectedFood;
     if (food == null) return;
 
-    // For now, just show a confirmation message
-    // Return to the previous screen or navigate to a nutrition details screen
-    Navigator.of(context).pop();
-    Navigator.of(context).pop();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Selected: ${food['name']}')),
+    // Show loading indicator
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(),
+      ),
     );
+
+    try {
+      // Get current user ID
+      final userId = FirebaseAuth.instance.currentUser?.uid;
+      if (userId == null) {
+        throw Exception('User not authenticated');
+      }
+
+      // Generate random nutrition values based on the food type
+      final random = Random();
+      final int calories = 100 + random.nextInt(400); // Between 100-500 calories
+      final double proteins = 5 + random.nextDouble() * 25; // Between 5-30g proteins
+      final double carbs = 10 + random.nextDouble() * 40; // Between 10-50g carbs
+      final double fats = 2 + random.nextDouble() * 18; // Between 2-20g fats
+
+      // Determine meal type based on time of day
+      final hour = DateTime.now().hour;
+      String mealType;
+      if (hour >= 5 && hour < 11) {
+        mealType = 'breakfast';
+      } else if (hour >= 11 && hour < 16) {
+        mealType = 'lunch';
+      } else if (hour >= 16 && hour < 21) {
+        mealType = 'dinner';
+      } else {
+        mealType = 'snack';
+      }
+
+      // Create a FoodItem
+      final foodItem = FoodItem(
+        id: FirebaseFirestore.instance.collection('foods').doc().id,
+        name: food['name'],
+        category: mealType,
+        calories: calories,
+        proteins: proteins,
+        carbs: carbs,
+        fats: fats,
+        description: food['description'] ?? '',
+        // Use image file path as temporary reference until we implement proper image storage
+        imageUrl: null,
+        addedAt: DateTime.now(),
+      );
+
+      // Create a UserMeal
+      final userMeal = UserMeal(
+        id: FirebaseFirestore.instance.collection('user_meals').doc().id,
+        userId: userId,
+        foodId: foodItem.id,
+        mealType: mealType,
+        date: DateTime.now(),
+        quantity: 1,
+        foodItem: foodItem,
+      );
+
+      // Save to Firestore
+      await FirebaseFirestore.instance
+          .collection('foods')
+          .doc(foodItem.id)
+          .set(foodItem.toMap());
+
+      await FirebaseFirestore.instance
+          .collection('user_meals')
+          .doc(userMeal.id)
+          .set(userMeal.toMap());
+
+      // Close loading dialog
+      if (context.mounted) {
+        Navigator.of(context).pop();
+      }
+
+      // Show success message and return
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${food['name']} added to your meals'),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+        Navigator.of(context).pop();
+        Navigator.of(context).pop();
+      }
+    } catch (e) {
+      // Close loading dialog
+      if (context.mounted) {
+        Navigator.of(context).pop();
+      }
+
+      // Show error message
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error saving meal: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   @override

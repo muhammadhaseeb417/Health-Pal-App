@@ -18,6 +18,7 @@ import 'package:health_pal/features/On%20Boarding/on_boarding_screen_4_next.dart
 import 'package:health_pal/features/On%20Boarding/on_boarding_screen_5.dart';
 import 'package:health_pal/features/Profile/UI/daily_intake_screen.dart';
 import 'package:health_pal/features/Profile/UI/favorites_food_screen.dart';
+import 'package:health_pal/features/Profile/UI/my_meals_screen.dart';
 import 'package:health_pal/features/Profile/UI/profile_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:health_pal/features/Authentication/services/user_auth.dart';
@@ -127,6 +128,7 @@ class MyApp extends StatelessWidget {
         "/food_description_page": (context) => const FoodDescriptionPage(),
         '/daily_intake': (context) => const DailyIntakeScreen(),
         '/favorites_food': (context) => const FavoritesFoodScreen(),
+        '/my_meals': (context) => const MyMealsScreen(),
       },
       home: AuthenticationWrapper(
         hasSeenOnboardingOfApp: hasSeenOnboardingOfApp,

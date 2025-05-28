@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:health_pal/features/Authentication/models/user_model.dart';
 import 'package:health_pal/features/Authentication/services/firebase_database_func.dart';
-import 'package:health_pal/features/Authentication/services/user_auth.dart';
 import 'package:health_pal/features/Profile/widgets/setting_menu_bar.dart';
 import 'package:health_pal/main.dart';
 import 'package:health_pal/features/On%20Boarding/models/user_details_model.dart';
@@ -12,7 +11,6 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final FirebaseDatabaseService _databaseService = FirebaseDatabaseService();
-    final UserAuth userAuth = UserAuth();
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -24,7 +22,7 @@ class ProfileScreen extends StatelessWidget {
         centerTitle: true,
         leading: const Icon(Icons.arrow_back_ios, color: Colors.transparent),
         elevation: 0,
-        backgroundColor: const Color.fromARGB(255, 42, 7, 7),
+        backgroundColor: Colors.white,
       ),
       body: StreamBuilder<UserModel?>(
         stream: _databaseService.streamCurrentUserData(),
@@ -125,7 +123,14 @@ class ProfileScreen extends StatelessWidget {
     Navigator.pushNamed(context, '/daily_intake');
   },
 ),
-                        
+                        const SizedBox(height: 12),
+                        SettingMenuBar(
+                          title: "My Meals",
+                          icon: Icons.food_bank_outlined,
+                          function: () {
+                            Navigator.pushNamed(context, '/my_meals');
+                          },
+                        ),
                         const SizedBox(height: 12),
                         SettingMenuBar(
                           title: "Favorites Food",
