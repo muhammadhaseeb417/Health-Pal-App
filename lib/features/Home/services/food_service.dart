@@ -48,27 +48,79 @@ class FoodService {
     }
   }
 
-  // Get all food items
+  // Cache for all foods
+  List<FoodItem>? _allFoodsCache;
+  DateTime? _lastAllFoodsLoadTime;
+  
+  // Get all food items with caching
   Future<List<FoodItem>> getAllFoods() async {
     try {
+      // Return cached foods if available and not expired
+      final now = DateTime.now();
+      if (_allFoodsCache != null && 
+          _lastAllFoodsLoadTime != null && 
+          now.difference(_lastAllFoodsLoadTime!).inMilliseconds < _cacheExpirationTime) {
+        return List.from(_allFoodsCache!); // Return a copy to avoid modifying cache
+      }
+      
       final snapshot = await foodsCollection.get();
-      return snapshot.docs
+      final foods = snapshot.docs
           .map((doc) => FoodItem.fromDocument(doc))
           .toList();
+      
+      // Update cache
+      _allFoodsCache = List.from(foods);
+      _lastAllFoodsLoadTime = now;
+      
+      return foods;
     } catch (e) {
       throw Exception('Failed to get food items: ${e.toString()}');
     }
   }
 
-  // Get food items by category
+  // Cache for foods by category
+  Map<String, List<FoodItem>> _foodsByCategoryCache = {};
+  Map<String, DateTime> _lastCategoryLoadTime = {};
+  
+  // Get food items by category with caching
   Future<List<FoodItem>> getFoodsByCategory(String category) async {
     try {
+      // Return cached category foods if available and not expired
+      final now = DateTime.now();
+      if (_foodsByCategoryCache.containsKey(category) && 
+          _lastCategoryLoadTime.containsKey(category) && 
+          now.difference(_lastCategoryLoadTime[category]!).inMilliseconds < _cacheExpirationTime) {
+        return List.from(_foodsByCategoryCache[category]!); // Return a copy
+      }
+      
+      // If all foods are cached, filter from cache instead of querying
+      if (_allFoodsCache != null && 
+          _lastAllFoodsLoadTime != null && 
+          now.difference(_lastAllFoodsLoadTime!).inMilliseconds < _cacheExpirationTime) {
+        final categoryFoods = _allFoodsCache!
+            .where((food) => food.category == category)
+            .toList();
+            
+        // Update category cache
+        _foodsByCategoryCache[category] = List.from(categoryFoods);
+        _lastCategoryLoadTime[category] = now;
+        
+        return categoryFoods;
+      }
+      
+      // If not cached, query from Firestore
       final snapshot = await foodsCollection
           .where('category', isEqualTo: category)
           .get();
-      return snapshot.docs
+      final foods = snapshot.docs
           .map((doc) => FoodItem.fromDocument(doc))
           .toList();
+      
+      // Update cache
+      _foodsByCategoryCache[category] = List.from(foods);
+      _lastCategoryLoadTime[category] = now;
+      
+      return foods;
     } catch (e) {
       throw Exception('Failed to get food items by category: ${e.toString()}');
     }
@@ -218,6 +270,162 @@ class FoodService {
       await addFoods(_predefinedFoods);
     } catch (e) {
       throw Exception('Failed to initialize food database: ${e.toString()}');
+    }
+  }
+  
+  // Toggle favorite status for a food item
+  Future<void> toggleFavorite(String foodId) async {
+    try {
+      if (currentUserId == null) {
+        throw Exception('No current user');
+      }
+      
+      // Reference to the user favorites collection
+      final userFavoritesRef = _firestore.collection('user_favorites')
+          .doc(currentUserId)
+          .collection('foods');
+      
+      // Check if this food is already a favorite using the cached method
+      final isFavorite = await isFoodFavorite(foodId);
+      
+      if (isFavorite) {
+        // If already a favorite, remove it
+        await userFavoritesRef.doc(foodId).delete();
+      } else {
+        // If not a favorite, add it
+        await userFavoritesRef.doc(foodId).set({
+          'foodId': foodId,
+          'addedAt': FieldValue.serverTimestamp(),
+        });
+      }
+      
+      // Invalidate cache after changing favorite status
+      _favoriteFoodIds = null;
+      _lastFavoriteCheckTime = null;
+    } catch (e) {
+      throw Exception('Failed to toggle favorite status: ${e.toString()}');
+    }
+  }
+  
+
+  
+  // Cache of favorite food IDs for the current user
+  Set<String>? _favoriteFoodIds;
+  DateTime? _lastFavoriteCheckTime;
+  
+  // Cache expiration time in milliseconds (5 minutes)
+  static const int _cacheExpirationTime = 300000; // 5 minutes
+  
+  // Get all favorite food IDs for the current user
+  Future<Set<String>> _getFavoriteFoodIds() async {
+    try {
+      // Return cached ids if available and not expired
+      final now = DateTime.now();
+      if (_favoriteFoodIds != null && 
+          _lastFavoriteCheckTime != null && 
+          now.difference(_lastFavoriteCheckTime!).inMilliseconds < _cacheExpirationTime) {
+        return _favoriteFoodIds!;
+      }
+      
+      if (currentUserId == null) {
+        return {};
+      }
+      
+      // Get the user's favorite food IDs
+      final favoritesSnapshot = await _firestore.collection('user_favorites')
+          .doc(currentUserId)
+          .collection('foods')
+          .get();
+      
+      // Update cache
+      _favoriteFoodIds = favoritesSnapshot.docs.map((doc) => doc.id).toSet();
+      _lastFavoriteCheckTime = now;
+      
+      return _favoriteFoodIds!;
+    } catch (e) {
+      // If there's an error, return empty set but don't update cache
+      return {};
+    }
+  }
+  
+  // Check if a food is favorited by the user (using cache)
+  Future<bool> isFoodFavorite(String foodId) async {
+    try {
+      if (currentUserId == null) {
+        return false;
+      }
+      
+      final favoriteIds = await _getFavoriteFoodIds();
+      return favoriteIds.contains(foodId);
+    } catch (e) {
+      return false;
+    }
+  }
+  
+  // Get all favorite foods for the current user
+  Future<List<FoodItem>> getFavoriteFoods() async {
+    try {
+      if (currentUserId == null) {
+        throw Exception('No current user');
+      }
+      
+      // Get favorite IDs using the cached method
+      final favoriteIds = await _getFavoriteFoodIds();
+      
+      if (favoriteIds.isEmpty) {
+        return [];
+      }
+      
+      // Convert set to list for batch processing
+      final foodIds = favoriteIds.toList();
+      
+      // Fetch the actual food items
+      final foodsList = <FoodItem>[];
+      
+      // Fetch foods in batches (Firestore has a limit on 'in' queries)
+      for (int i = 0; i < foodIds.length; i += 10) {
+        final end = (i + 10 < foodIds.length) ? i + 10 : foodIds.length;
+        final batch = foodIds.sublist(i, end);
+        
+        final snapshot = await foodsCollection
+            .where(FieldPath.documentId, whereIn: batch)
+            .get();
+            
+        foodsList.addAll(snapshot.docs
+            .map((doc) => FoodItem.fromDocument(doc).copyWith(isFavorite: true)));
+      }
+      
+      return foodsList;
+    } catch (e) {
+      throw Exception('Failed to get favorite foods: ${e.toString()}');
+    }
+  }
+  
+  // Search foods by name
+  Future<List<FoodItem>> searchFoods(String query) async {
+    try {
+      if (query.isEmpty) {
+        return getAllFoods();
+      }
+      
+      // Convert query to lowercase for case-insensitive search
+      final lowerQuery = query.toLowerCase();
+      
+      // Get all foods and filter locally (Firestore doesn't support partial text search natively)
+      final allFoods = await getAllFoods();
+      final matchingFoods = allFoods.where(
+        (food) => food.name.toLowerCase().contains(lowerQuery)
+      ).toList();
+      
+      // Get all favorite IDs in one batch
+      final favoriteIds = await _getFavoriteFoodIds();
+      
+      // Update favorite status for all matching foods at once
+      return matchingFoods.map((food) => 
+        food.copyWith(isFavorite: favoriteIds.contains(food.id))
+      ).toList();
+    } catch (e) {
+      throw Exception('Failed to search foods: ${e.toString()}');
     }
   }
 

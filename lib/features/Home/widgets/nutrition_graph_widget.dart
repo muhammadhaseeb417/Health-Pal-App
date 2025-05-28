@@ -6,12 +6,18 @@ class NutritionGraph extends StatelessWidget {
   final double proteins;
   final double carbs;
   final double fats;
+  final double proteinTarget;
+  final double carbsTarget;
+  final double fatsTarget;
 
   const NutritionGraph({
     Key? key,
     this.proteins = 0.0,
     this.carbs = 0.0,
     this.fats = 0.0,
+    this.proteinTarget = 90.0,
+    this.carbsTarget = 110.0,
+    this.fatsTarget = 70.0,
   }) : super(key: key);
 
   @override
@@ -92,16 +98,18 @@ class NutritionGraph extends StatelessWidget {
                 ),
               ),
               borderData: FlBorderData(show: false),
+              minY: 0,
+              maxY: [proteinTarget, carbsTarget, fatsTarget, proteins, carbs, fats].reduce((a, b) => a > b ? a : b) * 1.2,
               lineBarsData: [
                 LineChartBarData(
                   spots: [
-                    FlSpot(0, 1000),
-                    FlSpot(1, 900),
-                    FlSpot(2, 1200),
-                    FlSpot(3, 1500),
-                    FlSpot(4, 1700),
-                    FlSpot(5, 1600),
-                    FlSpot(6, 2000),
+                    FlSpot(0, proteins * 0.8),
+                    FlSpot(1, proteins * 0.9),
+                    FlSpot(2, proteins),
+                    FlSpot(3, proteins),
+                    FlSpot(4, proteins * 1.1),
+                    FlSpot(5, proteins * 1.05),
+                    FlSpot(6, proteins * 1.2),
                   ],
                   isCurved: true,
                   color: Colors.red,

@@ -140,8 +140,8 @@ class _FoodSelectionScreenState extends State<FoodSelectionScreen> {
           children: [
             // Food image
             Container(
-              width: 80,
-              height: 80,
+              width: 60,
+              height: 60,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
                 image: DecorationImage(
