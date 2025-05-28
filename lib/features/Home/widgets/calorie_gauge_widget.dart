@@ -114,7 +114,7 @@ class _CalorieGaugeWidgetState extends State<CalorieGaugeWidget> {
                           ),
                         ),
                         Text(
-                          "$currentCalories Kcal",
+                          "${currentCalories.toStringAsFixed(1)} Kcal",
                           style: TextStyle(
                               fontSize: 20, fontWeight: FontWeight.bold),
                         ),
