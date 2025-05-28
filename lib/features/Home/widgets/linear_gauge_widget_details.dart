@@ -19,6 +19,11 @@ class LinearGaugeWidgetDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    final formattedGainedPortion = gainedPortion.toStringAsFixed(1);
+    // Format totalPortion as integer since it's typically a whole number
+    final formattedTotalPortion = totalPortion.toInt();
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -51,7 +56,7 @@ class LinearGaugeWidgetDetails extends StatelessWidget {
           height: 5,
         ),
         Text(
-          '$gainedPortion/$totalPortion g',
+          '$formattedGainedPortion/$formattedTotalPortion g',
           style: TextStyle(
             fontSize: 15,
           ),
